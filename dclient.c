@@ -1,7 +1,7 @@
 #include "H_library.h"
 
 //int argc, char * argv[]
-int main(){
+int main() {
     if ((mkfifo("pipe_to_server",0666))==-1)
     {
         if (errno!=EEXIST)
