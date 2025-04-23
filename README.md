@@ -1,2 +1,6 @@
 # projetoSO
-Projeto feito em 24/25 na cadeira de Sistemas Operativos na minha universidade no 2º ano.
+Projeto feito em 24/25 em Sistemas Operativos
+
+-José Novais
+-Samir Mansour
+-Fábio Castelhano

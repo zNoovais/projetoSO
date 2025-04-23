@@ -1,64 +1,94 @@
 #include "H_library.h"
 
-//int argc, char * argv[]
-int main() {
-    if ((mkfifo("pipe_to_server",0666))==-1)
+int main(int argc, char* argv[]) { // i changed to this version just keep it simple and for now on we have to start commenting code... :D
+    if ( argc < 2 )
     {
-        if (errno!=EEXIST)
+        printf("Usage:\n");
+        printf("Index request: ./dclient -a [Title] [Author] [Year] [Document name] \n");
+        printf("Consult document: ./dclient -c [n]\n");
+        printf("Remove request: ./dclient -d [n]\n");
+        printf("Search number of lines of keyword: ./dclient -l [n] [keyword]\n");
+        printf("Search keyword: ./dclient -s [keyword]\n");
+        printf("Search keyword w/ processes: ./dclient -s [number of processes] [keyword]\n");
+        printf("Shutdown: ./dclient -f\n");
+        return 1;
+    }
+
+    char buffer[50]="";
+
+
+
+    if ( strcmp(argv[1],"-a") == 0 )
+    {
+        if ( argc != 6 ) // Case we dont have the right number of arguments
         {
-            perror("\nperror messege: ");
+            printf("Usage:\n");
+            printf("Index request: ./dclient -a [Title] [Author] [Year] [Document name] \n");
+            return 1;
+        }
+       
+        pid_t pid = getpid();
+        char name[20];
+        sprintf(name, "fifo_client:%d", pid); // the pid is like a unique id for the client very cooooooolllllll 
+
+        int res = mkfifo(name, 0600);
+        if (res == -1) {
+            perror("Error creating client FIFO too bad...");
             return 1;
         }
         
+        int fdserver = open(SERVER, O_WRONLY); // starting to write on the server fifo in order to the server see us <3
+        if (fdserver == -1) {
+            perror("Error opening server FIFO lmaooo");
+            return 1;
+        }
+        
+        FileInfo fileinfo;
+
+        fileinfo.id = pid;
+        fileinfo.title = argv[2];
+        fileinfo.author = argv[3];
+        fileinfo.year = atoi(argv[4]);
+        fileinfo.path = argv[5];
+
+        write(fdserver, &fileinfo, sizeof(FileInfo)); // writing the fileinfo struct in the server fifo to the server see this and do NASTY stuff with it 
+        
+        int fdclient = open(name, O_RDONLY); // opening the client fifo to read the response from the server
+        if (fdclient == -1) {
+            perror("Error opening client FIFO..");
+            return 1;
+        }
+
+        while((res = read(fdclient, buffer, sizeof(buffer))) > 0) {
+
+            printf("%s\n", buffer);  // for now im assuming the server will send us a string with the response and maybe will... 
+
+        }
+        
+
+        
     }
-    
-    printf("\nwellcome to group (group name) project");
-    printf("\nplease enter the name of the file you are searching for: ");
-    char name_of_file[100];
-    scanf("%s", name_of_file);
-    printf("\nplease conferm the name: %s", name_of_file);
-    printf("\nif the name of the file is wrong enter (-1) else press (1): \n");
-    int ans;
-    scanf("%d", &ans);
-    if (ans==-1)
+
+    if ( strcmp(argv[1],"-c") == 0 )
     {
-        printf("\nplease re-enter the name\n");
-        scanf("%s", name_of_file);
+        // TODO
     }
-    sleep(1);
-    printf("\nconnecting the server............\n");
-    sleep(2);
-    loading();
-    printf("server connected\n");
-    // sleep(1);
-    // printf("......................\n");
-    // sleep(1);
-    // printf("......................\n");
-    // sleep(1);
-    // printf("......................\n");
-    // printf("\n");
 
-    int fd=open("pipe_to_server",O_WRONLY); //pipe
-    if (fd==-1)
+    if ( strcmp(argv[1],"-d") == 0 )
     {
-        printf("\nerror in opening the file\n");
-        perror("\n --> perror message: ");
-        return 1;
+        // TODO
     }
-    if ((write(fd,name_of_file,sizeof(name_of_file))+1)==-1)// +1 for null terminator
+
+    if ( strcmp(argv[1],"-l") == 0 )
     {
-        printf("\nerror in writing in pipe\n");
-        perror("\n --> perror message: ");
-        return 2;
+        // TO DO
     }
-    close(fd);
-    
-    
 
-    
-
-
-
+    if ( strcmp(argv[1],"-s") == 0)
+    {
+        // TO DO
+    }
 
     return 0;
+
 }

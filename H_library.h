@@ -10,11 +10,12 @@
 #include <time.h>
 #include <limits.h>
 
+#define SERVER "fifo_server" // this is the name of the server fifo just to make it in one place! (like in guide 5 again..)
 
 
+typedef struct FileInfo { //this should not exceed 512bytes
 
-
-typedef struct FileInfo{ //this should not exceed 512bytes
+    int id; // this will be the pid so that we can find the client fifo (check guide 5 is smth like that)
 
     int year; // max 4bytes ez
     char* title; // max 200bytes the author and the title together

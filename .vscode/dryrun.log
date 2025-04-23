@@ -1,0 +1,6 @@
+make -f /home/novais/Transferências/Codigo/C/Sistemas Operativos/project/projetoSO/Makefile --dry-run --keep-going --print-directory
+make: Entering directory '/home/novais/Transferências/Codigo/C/Sistemas Operativos/project/projetoSO'
+gcc -Wall -g -c dclient.c -o client.o
+gcc -Wall -g -o client client.o functions.o
+make: Leaving directory '/home/novais/Transferências/Codigo/C/Sistemas Operativos/project/projetoSO'
+ 
