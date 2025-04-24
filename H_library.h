@@ -10,8 +10,9 @@
 #include <time.h>
 #include <limits.h>
 
-#define SERVER "fifo_server" // this is the name of the server fifo just to make it in one place! (like in guide 5 again..)
-
+//#define SERVER "fifo_server"
+#define PIPE_TO_SERVER "fifo_server" // this is the name of the server fifo just to make it in one place! (like in guide 5 again..)
+// i changed ^^^^^^this fucker to PIPE_TO_SERVER so that we can understand where it going 
 
 typedef struct FileInfo { //this should not exceed 512bytes
 
