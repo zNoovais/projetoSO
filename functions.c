@@ -45,7 +45,7 @@ void search_file(const char *filename) {
     DIR *dir;
     struct dirent *entry;
     
-    dir = opendir("/Users/samirMansour_1/Desktop/UNI/Year 2/Secund semester/Operating System/proj/DatasetTest/Gdataset");
+    dir = opendir(" the file path");
     if (dir == NULL) {
         perror("Error opening directory");
         return;
