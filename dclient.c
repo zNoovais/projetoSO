@@ -317,7 +317,7 @@ int main(int argc, char* argv[]) { // i changed to this version just keep it sim
         if (argv[3]==NULL)
         {
          //sending
-         n=2; //n helps me, ill explain face to face 
+         n=2; //n helps me, ill explain face to face
          if ((write(fd_to_server,&n,sizeof(int)))==-1)
          {
              printf("error sending book\n");
@@ -368,7 +368,7 @@ int main(int argc, char* argv[]) { // i changed to this version just keep it sim
          pid_t pid = getpid(); //the special id
          char name[20]; //pipe name 
          sprintf(name, "fifo_client:%d", pid); // the pid is like a unique id for the client very cooooooolllllll 
-         int fd_pipe_to_client = open(name, O_RDONLY); // opening the client fifo to read the response from the server
+         int fd_pipe_to_client = open(name, O_RDONLY); // opening the client fifo to read the response from the server 
  
          if (fd_pipe_to_client == -1) {
              perror("Error opening client FIFO hahahahhahah get fucked monky");
