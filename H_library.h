@@ -13,12 +13,14 @@
 //#define SERVER "fifo_server"
 #define PIPE_TO_SERVER "fifo_server" // this is the name of the server fifo just to make it in one place! (like in guide 5 again..)
 // i changed ^^^^^^this fucker to PIPE_TO_SERVER so that we can understand where it going 
+#define PIPE_TO_CLIENT "fifo_client" 
 
 typedef struct FileInfo { 
 
     int id; 
-
+    char op[3];
     int year; 
+    char keyword[20];
     char title[100]; 
     char author[100];
     char path[64]; 
