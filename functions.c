@@ -63,7 +63,7 @@ void search_file(const char *filename) {
     return; // file not found
 }
 
-// Interesting struct tha we could use in the server, if I am not wrong
+// Interesting struct tha we could use in the server, if I am not wrong R: yea we can use this for storing in memory the documents that we are indexing
 typedef struct Document {
     int id;
     char title[201];
