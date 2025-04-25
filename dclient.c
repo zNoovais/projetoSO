@@ -17,6 +17,8 @@ int main(int argc, char* argv[]) { // i changed to this version just keep it sim
     char buffer[50]="";
 
 
+    // Index request: ./dclient -a [Title] [Author] [Year] [Document name]
+
     char cmd;
     if ( strcmp(argv[1],"-a") == 0 )
     {
@@ -46,13 +48,13 @@ int main(int argc, char* argv[]) { // i changed to this version just keep it sim
 
         FileInfo fileinfo;
 
-        // allocatting memory and copy strings and shit 
+        // allocatting memory and copy strings and shit | i changed to strcpy its better guys :D
+
         fileinfo.id = pid;
-        //using dup because im duplicatting that bitch
-        fileinfo.title = strdup(argv[2]); 
-        fileinfo.author = strdup(argv[3]);
-        fileinfo.year = atoi(argv[4]);
-        fileinfo.path = strdup(argv[5]);
+        strcpy(fileinfo.title, argv[2]);  
+        strcpy(fileinfo.author, argv[3]); 
+        fileinfo.year = atoi(argv[4]);    
+        strcpy(fileinfo.path, argv[5]);   
 
 
         cmd='a';
@@ -65,28 +67,21 @@ int main(int argc, char* argv[]) { // i changed to this version just keep it sim
         }
 
         // writing the fileinfo struct in the server fifo so that the server see's the info and do NASTY stuff with it 
-        write(fd_to_server, &fileinfo.id, sizeof(int)); //pid id so that the server knows to wich fucker it has to send 
         
-        int title_len = strlen(fileinfo.title) + 1;
-        write(fd_to_server, &title_len, sizeof(int)); 
-        write(fd_to_server, fileinfo.title, title_len);
-
-        int author_len = strlen(fileinfo.author) + 1;
-        write(fd_to_server, &author_len, sizeof(int));
-        write(fd_to_server, fileinfo.author, author_len);
-
-        write(fd_to_server, &fileinfo.year, sizeof(int)); 
-
-        int path_len = strlen(fileinfo.path) + 1;
-        write(fd_to_server, &path_len, sizeof(int));
-        write(fd_to_server, fileinfo.path, path_len);
-
+        write(fd_to_server, &fileinfo, sizeof(FileInfo)); // read comment below x)
+        /*
+            ok.. i noticed on your topic (num4) you said it wont work but the
+            other solution create a HUGE problem that is processes concorrencies and anothers with the server so we
+            need to it like this... and the problem with the pointers i think im solving by just simply putting
+            the hole string in the struct!
+        */
+        
 
 
         
         int fd_pipe_to_client = open(name, O_RDONLY); // opening the client fifo to read the response from the server
         if (fd_pipe_to_client == -1) {
-            perror("Error opening client FIFO hahahahhahah get fucked monky");
+            perror("Error opening client FIFO hahahahhahah get L monky"); 
             return 1;
         }
 
@@ -113,6 +108,7 @@ int main(int argc, char* argv[]) { // i changed to this version just keep it sim
      Year: 1997
      Path: 1112.txt
     */
+
     else if ( strcmp(argv[1],"-c") == 0 )
     {
         if (argc!=3)
