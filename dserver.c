@@ -63,7 +63,7 @@ int main(int argc, char * argv[]) {
         
         sprintf(pipe_name, "fifo_client:%d", fileinfo.id);
         
-        int fd_to_client = open(pipe_name, O_WRONLY);
+        int fd_to_client = open(pipe_name, O_WRONLY);// the pipe of a specific client
         if (fd_to_client == -1) {
             perror("Error opening client FIFO");
         }
@@ -83,8 +83,6 @@ int main(int argc, char * argv[]) {
             new_file->next = cache[hash(next_id)]; // hash function to get the index in the cache
             cache[hash(next_id)] = new_file; // adding the new file to the cache :DD
 
-            
-            
 
 
             char msg[] = "Document indexed successfully";
@@ -95,24 +93,106 @@ int main(int argc, char * argv[]) {
         } else if (fileinfo.op[1] == 'c') {
 
             printf("Consulting document with ID: %d\n", fileinfo.id);
-            // Here we would call the function to consult the document
-            // consult_document(fileinfo.id);
+            
+            Linked* curr = cache[hash(fileinfo.id)];
+            while (curr != NULL) {                  // traversing the cache on the hash index !!
+
+                if (curr->file.id == fileinfo.id) {
+                    
+                    char msg[256];
+
+                    sprintf(msg,"Title: %s\nAuthors: %s\nYear: %d\nPath: %s", curr->file.title, curr->file.author, curr->file.year, curr->file.path);
+                    
+                    write(fd_to_client, msg, sizeof(msg));
+                    printf("Document with ID %d found in cache.\n", fileinfo.id);
+
+                    break;
+                }
+                curr = curr->next;
+            }
+
+            if (curr == NULL) {
+                printf("Document with ID %d not found in cache.\n", fileinfo.id);
+                printf("Searching in storage...\n");
+                lseek(fd_file, 0, SEEK_SET); // going back to the start of the file
+            }
 
 
-        } else if (fileinfo.op[1] == 'd') {
+        } 
+        
+        else if (fileinfo.op[1] == 'd') {
 
             printf("Removing document with ID: %d\n", fileinfo.id);
             // Here we would call the function to remove the document
             // remove_document(fileinfo.id);
 
+            Linked* curr = cache[hash(fileinfo.id)];
+            Linked* prev = cache[hash(fileinfo.id)];
 
-        } else if (fileinfo.op[1] == 'l') {
+            if (curr == NULL) {
+                printf("Document with ID %d not found in cache.\n", fileinfo.id);
+            }
+
+            else if (curr->file.id == fileinfo.id) {
+                cache[hash(fileinfo.id)] = curr->next; // removing the first element
+                free(curr);
+                printf("Document with ID %d removed from cache.\n", fileinfo.id);
+            } 
+            else {
+                prev = curr; // setting the previous element to the first oneeee
+                curr = curr->next; // moving to the next element
+
+                while (curr != NULL) {                  // traversing the cache on the hash index !!
+                    if (curr->file.id == fileinfo.id) {
+                        prev->next = curr->next; // removing the element
+                        free(curr);
+                        printf("Document with ID %d removed from cache.\n", fileinfo.id);
+                        break;
+                    }
+                    prev = curr;
+                    curr = curr->next;
+                }
+
+                if (curr == NULL) {
+                    printf("Document with ID %d not found in cache.\n", fileinfo.id);
+                }
+
+            }
+
+            // Here we would call the function to remove the document from the storage file
+            // remove_document_from_storage(fileinfo.id);     
+        }
+
+        else if (fileinfo.op[1] == 'l') { // ./dclient -l [n] [keyword]
+
+            
 
             printf("Searching for keyword in document with ID: %d\n", fileinfo.id);
             // Here we would call the function to search for a keyword in the document
             // search_keyword_in_document(fileinfo.id, fileinfo.keyword);
 
-        } else if (fileinfo.op[1] == 's') {
+            Linked* curr = cache[hash(fileinfo.id)];
+            while (curr != NULL) {                  // traversing the cache on the hash index !!
+                if (curr->file.id == fileinfo.id) {
+                    printf("Document with ID %d found in cache.\n", fileinfo.id);
+                    break;
+                }
+                curr = curr->next;
+            }
+            if (curr == NULL) {
+                printf("Document with ID %d not found in cache.\n", fileinfo.id);
+                printf("Searching in storage...\n");
+                lseek(fd_file, 0, SEEK_SET); // going back to the start of the file
+            }
+                //after i find in the storage i want to add it to the cache
+                // and then i want to search for the keyword in the document
+
+            // Here we would call the function to search for a keyword in the document
+            // search_keyword_in_document(fileinfo.id, fileinfo.keyword);
+
+        } 
+        
+        else if (fileinfo.op[1] == 's') {  // this function its tricky because we have to search in tghe cache and in the storage
             
             printf("Searching for keyword: %s\n", fileinfo.keyword);
             
@@ -134,6 +214,8 @@ int main(int argc, char * argv[]) {
 
             printf("Shutting down server...\n");
             server_open = 0;
+
+            // Here we have to rewrite the storage file with the new data
             
         }
 

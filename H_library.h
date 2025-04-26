@@ -33,6 +33,7 @@ typedef struct FileInfo {
 } FileInfo;  // we needed to change to static values not * it wont work with a write on the server fifo
 
 typedef struct indexed_file {
+    int active;
     int id;
     char title[100]; 
     char author[100];
