@@ -18,19 +18,23 @@
 #define CACHE_SIZE 100
 
 #define storage_path "armazenamento"
-typedef struct FileInfo { 
 
-    int id; 
-    int processes;
-    char op[3];
-    int year; 
-    char keyword[20];
-    char title[100]; 
+//infromation abiout the books and shit
+typedef struct FileInfo { //this should not exceed 512bytes
+
+    int id; // this will be the pid so that we can find the client fifo (check guide 5 is smth like that) aka pipe: fd_from_server
+    int processes; //the number of children (-s)
+
+    char cmd[3]; //op
+    
+    char title[100]; // max 200bytes the author and the title together
     char author[100];
-    char path[64]; 
-    int index;
+    int year; // max 4bytes ez
+    char path[64];
+    int index; 
+    char word[20]; //the key_word to search for 
+}
 
-} FileInfo;  // we needed to change to static values not * it wont work with a write on the server fifo
 
 typedef struct indexed_file {
     int active;
