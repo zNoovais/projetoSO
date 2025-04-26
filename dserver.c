@@ -68,7 +68,7 @@ int main(int argc, char * argv[]) {
             perror("Error opening client FIFO");
         }
 
-        if (fileinfo.op[1] == 'a') { //a [Title] [Author] [Year] [Document name]
+        if (fileinfo.cmd[1] == 'a') { //a [Title] [Author] [Year] [Document name]
 
             printf("Indexing document: %s\n", fileinfo.title);
             
@@ -90,7 +90,7 @@ int main(int argc, char * argv[]) {
 
 
 
-        } else if (fileinfo.op[1] == 'c') {
+        } else if (fileinfo.cmd[1] == 'c') {
 
             printf("Consulting document with ID: %d\n", fileinfo.id);
             
@@ -120,7 +120,7 @@ int main(int argc, char * argv[]) {
 
         } 
         
-        else if (fileinfo.op[1] == 'd') {
+        else if (fileinfo.cmd[1] == 'd') {
 
             printf("Removing document with ID: %d\n", fileinfo.id);
             // Here we would call the function to remove the document
@@ -163,7 +163,7 @@ int main(int argc, char * argv[]) {
             // remove_document_from_storage(fileinfo.id);     
         }
 
-        else if (fileinfo.op[1] == 'l') { // ./dclient -l [n] [keyword]
+        else if (fileinfo.cmd[1] == 'l') { // ./dclient -l [n] [keyword]
 
             
 
@@ -192,11 +192,11 @@ int main(int argc, char * argv[]) {
 
         } 
         
-        else if (fileinfo.op[1] == 's') {  // this function its tricky because we have to search in tghe cache and in the storage
+        else if (fileinfo.cmd[1] == 's') {  // this function its tricky because we have to search in tghe cache and in the storage
             
-            printf("Searching for keyword: %s\n", fileinfo.keyword);
+            printf("Searching for keyword: %s\n", fileinfo.word);
             
-            if (fileinfo.op[2] == '1') {
+            if (fileinfo.cmd[2] == '1') {
 
                 printf("Searching with processes...\n");
                 // Here we would call the function to search for a keyword with processes
@@ -210,7 +210,7 @@ int main(int argc, char * argv[]) {
             }
 
 
-        } else if (fileinfo.op[1] == 'f') {
+        } else if (fileinfo.cmd[1] == 'f') {
 
             printf("Shutting down server...\n");
             server_open = 0;
