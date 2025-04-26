@@ -14,18 +14,22 @@
 #define PIPE_TO_SERVER "fifo_server" // this is the name of the server fifo just to make it in one place! (like in guide 5 again..)
 // i changed ^^^^^^this fucker to PIPE_TO_SERVER so that we can understand where it going 
 
-typedef struct FileInfo { 
+//infromation abiout the books and shit
+typedef struct FileInfo { //this should not exceed 512bytes
 
-    int id; 
+    int id; // this will be the pid so that we can find the client fifo (check guide 5 is smth like that) aka pipe: fd_from_server
+    int processes; //the number of children (-s)
 
-    int year; 
-    char title[100]; 
+    char cmd[3]; //op
+    
+    char title[100]; // max 200bytes the author and the title together
     char author[100];
-    char path[64]; 
+    int year; // max 4bytes ez
+    char path[64]; // max 64bytes (idk why)
 
-} FileInfo;  // we needed to change to static values not * it wont work with a write on the server fifo
+    char word[20]; //the key_word to search for 
+    int index; //the index of the word (-a)
 
 
+} FileInfo;
 
-void loading();
-void search_file(const char *filename);
