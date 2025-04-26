@@ -33,7 +33,7 @@ typedef struct FileInfo { //this should not exceed 512bytes
     char path[64];
     int index; 
     char word[20]; //the key_word to search for 
-}
+} FileInfo;
 
 
 typedef struct indexed_file {
