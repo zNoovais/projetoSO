@@ -159,8 +159,8 @@ int main(int argc, char* argv[]) {
     //-f 
     //kill 
     else if (strcmp(argv[1], "-f") == 0) {
-        
-        strcpy(fileinfo.cmd, "f");
+    
+        strcpy(fileinfo.cmd, "-f");
         printf("Server is shutting down...\n");
         
     } 

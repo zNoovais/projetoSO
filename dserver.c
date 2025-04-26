@@ -238,7 +238,8 @@ int main(int argc, char * argv[]) {
 
             printf("Shutting down server...\n");
             server_open = 0;
-            break;
+            close(fd_to_server);
+            
 
             // Here we have to rewrite the storage file with the new data
             
