@@ -3,8 +3,42 @@
 
 int main(int argc, char * argv[]) {
 
+    
+    Linked* cache[CACHE_SIZE]; //creating the cache
+    for (int i = 0; i < CACHE_SIZE; i++) {
+        cache[i] = NULL;
+    }
+
+    int next_id = 1;
+    int number_of_files = 0;
+
     int res;
     printf("Server started!\n");
+
+    int fd_file = open(storage_path, O_CREAT | O_RDWR, 0600); // open the file to store the documents ezz
+    if (fd_file == -1) {
+        perror("Error opening storage file");
+        return 1;
+    }
+
+    indexed_file file;
+
+    ssize_t bytes_read;
+    while ((bytes_read = read(fd_file, &file, sizeof(file))) > 0) { // checking the number of files and the next id
+        if (bytes_read == -1) {
+            perror("Error reading from storage file");
+            close(fd_file);
+            return 1;
+        }
+        number_of_files++;
+        if (file.id >= next_id) {
+            next_id = file.id + 1;
+        }
+    }
+    
+    
+    lseek(fd_file, 0, SEEK_SET); // going back to the start of the file :)
+
 
     if ((mkfifo(PIPE_TO_SERVER,0600))==-1) //pipe to server
     {
@@ -34,12 +68,25 @@ int main(int argc, char * argv[]) {
             perror("Error opening client FIFO");
         }
 
-        if (fileinfo.op[1] == 'a') {
+        if (fileinfo.op[1] == 'a') { //a [Title] [Author] [Year] [Document name]
 
             printf("Indexing document: %s\n", fileinfo.title);
-            // Here we would call the function to index the document
-            // index_document(fileinfo.title, fileinfo.author, fileinfo.year, fileinfo.path);
-            // For now, we just send a success message back to the client
+            
+            Linked* new_file = malloc(sizeof(Linked));  
+
+            new_file->file.id = next_id;
+            strcpy(new_file->file.title, fileinfo.title);
+            strcpy(new_file->file.author, fileinfo.author);
+            new_file->file.year = fileinfo.year;
+            strcpy(new_file->file.path, fileinfo.path);
+
+            new_file->next = cache[hash(next_id)]; // hash function to get the index in the cache
+            cache[hash(next_id)] = new_file; // adding the new file to the cache :DD
+
+            
+            
+
+
             char msg[] = "Document indexed successfully";
             write(fd_to_client, msg, sizeof(msg));
 
