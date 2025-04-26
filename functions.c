@@ -15,60 +15,17 @@ clear();    // Clear the screen
 refresh();  // Update the screen
 */
 
-void loading(){
-   // Clear screen (cross-platform)
-    system("clear");
-    
-    int total=50;
-    printf("Loading: ");
-    for (int i = 0; i <= total; i++)
-    {
-        int percentage=(i*100)/total;
-        printf("\r"); // <<--- return to start of line
-        printf("loading: [");
-        for(int j = 0; j < i; j++) {
-            printf("#");
-        }
-        for(int j = i; j < total; j++) {
-            printf(" ");
-        }
-        printf("] %d%%", percentage);
-        fflush(stdout);
-        usleep(100000);
-    }
-    printf("\nloading complate!\n");
-}
 
 
-//temp function to search for file, needs fixing 
-void search_file(const char *filename) {
-    DIR *dir;
-    struct dirent *entry;
-    
-    dir = opendir(" the file path");
-    if (dir == NULL) {
-        perror("Error opening directory");
-        return;
-    }
-    
-    while ((entry = readdir(dir)) != NULL) {
-        if (strcmp(entry->d_name, filename) == 0) {
-            printf("File found: %s\n", filename);
-            closedir(dir); // file found
-            return;
-        }
-    }
-    
-    closedir(dir);
-    return; // file not found
-}
+
+
 
 // Interesting struct tha we could use in the server, if I am not wrong R: yea we can use this for storing in memory the documents that we are indexing
 typedef struct Document {
     int id;
     char title[201];
     char authors[201];
-    char year[5];
+    int year;
     char path[65];
     struct Document *next;
 } Document;
@@ -87,10 +44,10 @@ int index_document(const char *title, const char *authors, const char *year, con
     }
 
     doc->id = next_id++;
-    strncpy(doc->title, title, 200); doc->title[200] = '\0';
-    strncpy(doc->authors, authors, 200); doc->authors[200] = '\0';
-    strncpy(doc->year, year, 4); doc->year[4] = '\0';
-    strncpy(doc->path, path, 64); doc->path[64] = '\0';
+    strcpy(doc->title, title);
+    strcpy(doc->authors, authors);
+    doc-> year = atoi(year);
+    strcpy(doc->path, path); 
     doc->next = doc_list;
     doc_list = doc;
 
@@ -108,7 +65,7 @@ void consult_document(int key) {
         if (curr->id == key){
             printf("Title: %s\n", curr->title);
             printf("Authors: %s\n", curr->authors);
-            printf("Year: %s\n", curr->year);
+            printf("Year: %d\n", curr->year);
             printf("Path: %s\n", curr->path);
             return;
         }
@@ -162,7 +119,7 @@ int count_lines_with_keyword(int key, const char *keyword) {
             char buffer[4096];
             ssize_t bytes_read;
             int lines_with_keyword = 0;
-            char *line_start = buffer;
+            //char *line_start = buffer;
             size_t total = 0;
 
             while ((bytes_read = read(fd, buffer + total, sizeof(buffer) - total - 1)) > 0) {
@@ -212,3 +169,7 @@ void list_documents_with_keyword(const char *keyword) {
 }
 
 // Command -f : I didn't do yet, because I think it depends a lot on how the server is built.
+
+int hash (int key) {
+    return key % CACHE_SIZE;
+}
