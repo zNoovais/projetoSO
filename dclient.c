@@ -51,7 +51,7 @@ int main(int argc, char* argv[]) {
         }
         
         
-        strcpy(fileinfo.cmd, "a");
+        strcpy(fileinfo.cmd, "-a");
         strcpy(fileinfo.title, argv[2]);
         strcpy(fileinfo.author, argv[3]);
         fileinfo.year = atoi(argv[4]);
@@ -78,7 +78,7 @@ int main(int argc, char* argv[]) {
             return 1;
         }
         
-        strcpy(fileinfo.cmd, "c");
+        strcpy(fileinfo.cmd, "-c");
         fileinfo.index = atoi(argv[2]);
         
     } 
@@ -95,7 +95,7 @@ int main(int argc, char* argv[]) {
             return 1;
         }
         
-        strcpy(fileinfo.cmd, "d");
+        strcpy(fileinfo.cmd, "-d");
         fileinfo.index = atoi(argv[2]);
         
     } 
@@ -115,7 +115,7 @@ int main(int argc, char* argv[]) {
             return 1;
         }
         
-        strcpy(fileinfo.cmd, "l");
+        strcpy(fileinfo.cmd, "-l");
         fileinfo.index = atoi(argv[2]);
         strcpy(fileinfo.word, argv[3]);
         
@@ -140,7 +140,7 @@ int main(int argc, char* argv[]) {
             return 1;
         }
         
-        strcpy(fileinfo.cmd, "s");
+        strcpy(fileinfo.cmd, "-s");
         strcpy(fileinfo.word, argv[2]);
         
         if (argc == 4) { //instead if having two if statment, im checking with one, because i know its only to casses and im checking if its the secund case
@@ -206,27 +206,21 @@ int main(int argc, char* argv[]) {
     
     //ze i need you to check if this is ok::::
 
-    // processing server response based on command
-    if (strcmp(argv[1], "-c") == 0) {
-        // for document consultation, read a FileInfo struct back
-        FileInfo response;
-        if (read(fd_from_server, &response, sizeof(FileInfo)) == -1) {
-            perror("Error reading response from server");
-        } else {
-            printf("Title: %s\n", response.title);
-            printf("Author: %s\n", response.author);
-            printf("Year: %d\n", response.year);
-            printf("Path: %s\n", response.path);
+    while (1) {  // reading the response of the server
+        res = read(fd_from_server, buffer, sizeof(buffer) - 1);
+        if (res <= 0) {
+            if (res == -1) {
+                perror("error reading server response");
+            }
+            break; 
         }
-    } 
-    else {
-        // for other commands, just read a text buffer
-        while ((res = read(fd_from_server, buffer, sizeof(buffer) - 1)) > 0) {
-            buffer[res] = '\0';  // Ensure null termination
-            printf("%s\n", buffer);
-        }
+    
+        buffer[res] = '\0';  // Ensure null termination
+        printf("%s", buffer);
     }
     
+   
+ 
     // clean up
     close(fd_from_server);
     unlink(client_fifo);
