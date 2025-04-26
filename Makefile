@@ -24,3 +24,4 @@ pipe_to_server:
 clean:
 	rm -f *.o server client 
 	rm -f pipe_to_server
+	rm -f fifo_client*

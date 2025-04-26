@@ -9,10 +9,10 @@ int main(int argc, char * argv[]) {
         cache[i] = NULL;
     }
 
-    int next_id = 1;
+    int next_id = 0;
     int number_of_files = 0;
 
-    int res;
+   
     printf("Server started!\n");
 
     int fd_file = open(storage_path, O_CREAT | O_RDWR, 0600); // open the file to store the documents ezz
@@ -30,6 +30,7 @@ int main(int argc, char * argv[]) {
             close(fd_file);
             return 1;
         }
+        
         number_of_files++;
         if (file.id >= next_id) {
             next_id = file.id + 1;
@@ -54,13 +55,17 @@ int main(int argc, char * argv[]) {
     FileInfo fileinfo;
 
 
-    open("pipe_to_server",O_WRONLY); // this is to keep the pipe open (the server will not be writting in it) (check guide 5)
+    open(PIPE_TO_SERVER,O_WRONLY); // this is to keep the pipe open (the server will not be writting in it) (check guide 5)
 
+    int res;
     int server_open = 1;
-    while ( server_open && ((res = read(fd_to_server,&fileinfo,sizeof(FileInfo))) > 0) ) {
+    while ( server_open && (res = read(fd_to_server,&fileinfo,sizeof(FileInfo))) > 0) {
         
+
         char pipe_name[20]; 
         
+        printf("Command received: %d\n", fileinfo.id);
+
         sprintf(pipe_name, "fifo_client:%d", fileinfo.id);
         
         int fd_to_client = open(pipe_name, O_WRONLY);// the pipe of a specific client
@@ -92,21 +97,21 @@ int main(int argc, char * argv[]) {
 
         } else if (fileinfo.cmd[1] == 'c') {
 
-            printf("Consulting document with ID: %d\n", fileinfo.id);
+            printf("-C Consulting document with ID: %d\n", fileinfo.id);
             
             Linked* curr = cache[hash(fileinfo.id)];
             while (curr != NULL) {                  // traversing the cache on the hash index !!
 
                 if (curr->file.id == fileinfo.id) {
                     
-                    char msg[256];
+                    char msg[320];
 
                     sprintf(msg,"Title: %s\nAuthors: %s\nYear: %d\nPath: %s", curr->file.title, curr->file.author, curr->file.year, curr->file.path);
                     
                     write(fd_to_client, msg, sizeof(msg));
                     printf("Document with ID %d found in cache.\n", fileinfo.id);
 
-                    break;
+                    break;  
                 }
                 curr = curr->next;
             }
