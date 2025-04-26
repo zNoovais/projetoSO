@@ -151,8 +151,10 @@ int main(int argc, char* argv[]) {
             // here's the first case: ./dclient -s [keyword]
             fileinfo.processes = 1;
         }
+
         
     } 
+
 
     //-f 
     //kill 
@@ -171,12 +173,14 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+
     // because its a struct so i can just send it once after updating the struct, so i dont need to make a shit tun of write statments on every case / cmd
     if (write(fd_to_server, &fileinfo, sizeof(FileInfo)) == -1) {
         perror("Error writing to server FIFO");
         close(fd_to_server);
         unlink(client_fifo);
         return 1;
+
     }
     
     close(fd_to_server);

@@ -6,7 +6,7 @@ make all -f /home/novais/Transferências/Codigo/C/Sistemas Operativos/project/pr
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Fri Apr 25 15:31:35 2025
+# Make data base, printed on Fri Apr 25 23:35:17 2025
 
 # Variables
 
@@ -83,13 +83,13 @@ MAKEFILE_LIST := /home/novais/Transferências/Codigo/C/Sistemas Operativos/proje
 # automatic
 @F = $(notdir $@)
 # environment
-VSCODE_PID = 189275
+VSCODE_PID = 2428
 # environment
 XDG_SESSION_TYPE = x11
 # automatic
 ?D = $(patsubst %/,%,$(dir $?))
 # environment
-SESSION_MANAGER = local/novaisBOOK:@/tmp/.ICE-unix/1054,unix/novaisBOOK:/tmp/.ICE-unix/1054
+SESSION_MANAGER = local/novaisBOOK:@/tmp/.ICE-unix/1042,unix/novaisBOOK:/tmp/.ICE-unix/1042
 # automatic
 *F = $(notdir $*)
 # environment
@@ -163,7 +163,7 @@ GTK_MODULES = gail:atk-bridge
 # default
 MAKE_VERSION := 4.3
 # environment
-GIO_LAUNCHED_DESKTOP_FILE_PID = 189275
+GIO_LAUNCHED_DESKTOP_FILE_PID = 2428
 # environment
 _ = /usr/share/code/code
 # environment
@@ -277,6 +277,7 @@ clean:
 #  File has not been updated.
 #  recipe to execute (from '/home/novais/Transferências/Codigo/C/Sistemas Operativos/project/projetoSO/Makefile', line 25):
 	rm -f *.o server client 
+ 
 	rm -f pipe_to_server
 
 server: server.o functions.o
@@ -298,7 +299,7 @@ server: server.o functions.o
 # Not a target:
 dserver.c:
 #  Implicit rule search has been done.
-#  Last modified 2025-04-25 13:58:35.862638071
+#  Last modified 2025-04-25 23:35:17.043588794
 #  File has been updated.
 #  Successfully updated.
 
@@ -350,6 +351,6 @@ pipe_to_server:
 # strcache performance: lookups = 36 / hit rate = 55%
 # hash-table stats:
 # Load=16/8192=0%, Rehash=0, Collisions=0/36=0%
-# Finished Make data base on Fri Apr 25 15:31:35 2025
+# Finished Make data base on Fri Apr 25 23:35:17 2025
 
  
