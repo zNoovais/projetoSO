@@ -6,7 +6,7 @@ make all -f /home/novais/Transferências/Codigo/C/Sistemas Operativos/project/pr
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Fri Apr 25 23:35:17 2025
+# Make data base, printed on Sat Apr 26 20:25:18 2025
 
 # Variables
 
@@ -24,6 +24,8 @@ VSCODE_CWD = /home/novais
 GDM_LANG = pt_PT
 # default
 MAKE_COMMAND := make
+# environment
+APPLICATIONINSIGHTS_CONFIGURATION_CONTENT = {}
 # environment
 GTK3_MODULES = xapp-gtk3-module
 # environment
@@ -61,7 +63,10 @@ MAKEFLAGS = pqrR
 # makefile
 CURDIR := /home/novais/Transferências/Codigo/C/Sistemas Operativos/project/projetoSO
 # environment
+APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = 1
+# environment
 LESSOPEN = | /usr/bin/lesspipe %s
+ 
 # environment
 VSCODE_L10N_BUNDLE_LOCATION = 
 # automatic
@@ -83,13 +88,13 @@ MAKEFILE_LIST := /home/novais/Transferências/Codigo/C/Sistemas Operativos/proje
 # automatic
 @F = $(notdir $@)
 # environment
-VSCODE_PID = 2428
+VSCODE_PID = 2369
 # environment
 XDG_SESSION_TYPE = x11
 # automatic
 ?D = $(patsubst %/,%,$(dir $?))
 # environment
-SESSION_MANAGER = local/novaisBOOK:@/tmp/.ICE-unix/1042,unix/novaisBOOK:/tmp/.ICE-unix/1042
+SESSION_MANAGER = local/novaisBOOK:@/tmp/.ICE-unix/1567,unix/novaisBOOK:/tmp/.ICE-unix/1567
 # automatic
 *F = $(notdir $*)
 # environment
@@ -163,7 +168,7 @@ GTK_MODULES = gail:atk-bridge
 # default
 MAKE_VERSION := 4.3
 # environment
-GIO_LAUNCHED_DESKTOP_FILE_PID = 2428
+GIO_LAUNCHED_DESKTOP_FILE_PID = 2369
 # environment
 _ = /usr/share/code/code
 # environment
@@ -199,7 +204,7 @@ VSCODE_ESM_ENTRYPOINT = vs/workbench/api/node/extensionHostProcess
 # environment
 GDMSESSION = cinnamon
 # variable set hash-table stats:
-# Load=94/1024=9%, Rehash=0, Collisions=4/129=3%
+# Load=96/1024=9%, Rehash=0, Collisions=4/131=3%
 
 # Pattern-specific Variable Values
 
@@ -218,8 +223,28 @@ GDMSESSION = cinnamon
 
 functions.o: functions.c
 #  Implicit rule search has not been done.
-#  Modification time never checked.
-#  File has not been updated.
+#  Implicit/static pattern stem: ''
+#  File does not exist.
+#  File has been updated.
+#  Needs to be updated (-q is set).
+# automatic
+# @ := functions.o
+# automatic
+# * := 
+# automatic
+# < := functions.c
+# automatic
+# + := functions.c
+# automatic
+# % := 
+# automatic
+# ^ := functions.c
+# automatic
+# ? := functions.c
+# automatic
+# | := 
+# variable set hash-table stats:
+# Load=8/32=25%, Rehash=0, Collisions=2/13=15%
 #  recipe to execute (from '/home/novais/Transferências/Codigo/C/Sistemas Operativos/project/projetoSO/Makefile', line 19):
 	$(CC) $(CFLAGS) -c functions.c
 
@@ -239,35 +264,16 @@ client.o: dclient.c functions.o
 
 server.o: dserver.c
 #  Implicit rule search has not been done.
-#  Implicit/static pattern stem: ''
-#  File does not exist.
+#  Last modified 2025-04-26 20:25:09.225147614
 #  File has been updated.
-#  Needs to be updated (-q is set).
-# automatic
-# @ := server.o
-# automatic
-# * := 
-# automatic
-# < := dserver.c
-# automatic
-# + := dserver.c
-# automatic
-# % := 
-# automatic
-# ^ := dserver.c
-# automatic
-# ? := dserver.c
-# automatic
-# | := 
-# variable set hash-table stats:
-# Load=8/32=25%, Rehash=0, Collisions=2/13=15%
+#  Successfully updated.
 #  recipe to execute (from '/home/novais/Transferências/Codigo/C/Sistemas Operativos/project/projetoSO/Makefile', line 13):
 	$(CC) $(CFLAGS) -c dserver.c -o server.o
 
 # Not a target:
 /home/novais/Transferências/Codigo/C/Sistemas Operativos/project/projetoSO/Makefile:
 #  Implicit rule search has been done.
-#  Last modified 2025-04-23 22:22:14.606241556
+#  Last modified 2025-04-26 20:24:39.010964518
 #  File has been updated.
 #  Successfully updated.
 
@@ -277,12 +283,12 @@ clean:
 #  File has not been updated.
 #  recipe to execute (from '/home/novais/Transferências/Codigo/C/Sistemas Operativos/project/projetoSO/Makefile', line 25):
 	rm -f *.o server client 
- 
 	rm -f pipe_to_server
+	rm -f fifo_client*
 
 server: server.o functions.o
 #  Implicit rule search has not been done.
-#  File does not exist.
+#  Last modified 2025-04-26 20:25:09.225147614
 #  File has been updated.
 #  Needs to be updated (-q is set).
 # variable set hash-table stats:
@@ -299,7 +305,7 @@ server: server.o functions.o
 # Not a target:
 dserver.c:
 #  Implicit rule search has been done.
-#  Last modified 2025-04-25 23:35:17.043588794
+#  Last modified 2025-04-26 20:25:09.225147614
 #  File has been updated.
 #  Successfully updated.
 
@@ -320,9 +326,10 @@ dclient.c:
 
 # Not a target:
 functions.c:
-#  Implicit rule search has not been done.
-#  Modification time never checked.
-#  File has not been updated.
+#  Implicit rule search has been done.
+#  Last modified 2025-04-26 17:37:04.016297893
+#  File has been updated.
+#  Successfully updated.
 
 # Not a target:
 .SUFFIXES:
@@ -350,7 +357,8 @@ pipe_to_server:
 
 # strcache performance: lookups = 36 / hit rate = 55%
 # hash-table stats:
+ 
 # Load=16/8192=0%, Rehash=0, Collisions=0/36=0%
-# Finished Make data base on Fri Apr 25 23:35:17 2025
+# Finished Make data base on Sat Apr 26 20:25:18 2025
 
  
