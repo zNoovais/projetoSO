@@ -137,31 +137,31 @@ int main(int argc, char * argv[]) {
         
         else if (fileinfo.cmd[1] == 'd') {
 
-            printf("Removing document with ID: %d\n", fileinfo.id);
+            printf("Removing document with ID: %d\n", fileinfo.index);
             // Here we would call the function to remove the document
             // remove_document(fileinfo.id);
 
-            Linked* curr = cache[hash(fileinfo.id)];
-            Linked* prev = cache[hash(fileinfo.id)];
+            Linked* curr = cache[hash(fileinfo.index)];
+            Linked* prev = cache[hash(fileinfo.index)];
 
             if (curr == NULL) {
                 printf("Document with ID %d not found in cache.\n", fileinfo.id);
             }
 
-            else if (curr->file.id == fileinfo.id) {
-                cache[hash(fileinfo.id)] = curr->next; // removing the first element
+            else if (curr->file.id == fileinfo.index) {
+                cache[hash(fileinfo.index)] = curr->next; // removing the first element
                 free(curr);
-                printf("Document with ID %d removed from cache.\n", fileinfo.id);
+                printf("Document with ID %d removed from cache.\n", fileinfo.index);
             } 
             else {
                 prev = curr; // setting the previous element to the first oneeee
                 curr = curr->next; // moving to the next element
 
                 while (curr != NULL) {                  // traversing the cache on the hash index !!
-                    if (curr->file.id == fileinfo.id) {
+                    if (curr->file.id == fileinfo.index) {
                         prev->next = curr->next; // removing the element
                         free(curr);
-                        printf("Document with ID %d removed from cache.\n", fileinfo.id);
+                        printf("Document with ID %d removed from cache.\n", fileinfo.index);
                         break;
                     }
                     prev = curr;
@@ -169,7 +169,7 @@ int main(int argc, char * argv[]) {
                 }
 
                 if (curr == NULL) {
-                    printf("Document with ID %d not found in cache.\n", fileinfo.id);
+                    printf("Document with ID %d not found in cache.\n", fileinfo.index);
                 }
 
             }
