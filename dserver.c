@@ -1,6 +1,8 @@
 #include "H_library.h"
 
 
+
+
 int main(int argc, char * argv[]) {
 
     
@@ -9,10 +11,10 @@ int main(int argc, char * argv[]) {
         cache[i] = NULL;
     }
 
-    int next_id = 1;
+    int next_id = 0;
     int number_of_files = 0;
 
-    int res;
+   
     printf("Server started!\n");
 
     int fd_file = open(storage_path, O_CREAT | O_RDWR, 0600); // open the file to store the documents ezz
@@ -30,6 +32,7 @@ int main(int argc, char * argv[]) {
             close(fd_file);
             return 1;
         }
+        
         number_of_files++;
         if (file.id >= next_id) {
             next_id = file.id + 1;
@@ -54,13 +57,18 @@ int main(int argc, char * argv[]) {
     FileInfo fileinfo;
 
 
-    open("pipe_to_server",O_WRONLY); // this is to keep the pipe open (the server will not be writting in it) (check guide 5)
+    open(PIPE_TO_SERVER,O_WRONLY); // this is to keep the pipe open (the server will not be writting in it) (check guide 5)
 
+    int res;
     int server_open = 1;
-    while ( server_open && ((res = read(fd_to_server,&fileinfo,sizeof(FileInfo))) > 0) ) {
+    while ( server_open && (res = read(fd_to_server,&fileinfo,sizeof(FileInfo))) > 0) {
         
+
         char pipe_name[20]; 
         
+        printf("Command received: %d\n", fileinfo.id);
+        printf("Commamd %s\n",fileinfo.cmd);
+
         sprintf(pipe_name, "fifo_client:%d", fileinfo.id);
         
         int fd_to_client = open(pipe_name, O_WRONLY);// the pipe of a specific client
@@ -83,70 +91,77 @@ int main(int argc, char * argv[]) {
             new_file->next = cache[hash(next_id)]; // hash function to get the index in the cache
             cache[hash(next_id)] = new_file; // adding the new file to the cache :DD
 
+            char msg[220];
+            sprintf(msg,"%d\n",next_id);
 
+            next_id++;
 
-            char msg[] = "Document indexed successfully";
+            
             write(fd_to_client, msg, sizeof(msg));
 
+            close(fd_to_client);
 
+        } 
+        
+        else if (fileinfo.cmd[1] == 'c') {
 
-        } else if (fileinfo.cmd[1] == 'c') {
-
-            printf("Consulting document with ID: %d\n", fileinfo.id);
-            
-            Linked* curr = cache[hash(fileinfo.id)];
+            printf("-C Consulting document with ID: %d\n", fileinfo.index);
+            char msg[520];
+            Linked* curr = cache[hash(fileinfo.index)];
             while (curr != NULL) {                  // traversing the cache on the hash index !!
-
-                if (curr->file.id == fileinfo.id) {
+                
+                if (curr->file.id == fileinfo.index) {
                     
-                    char msg[256];
-
-                    sprintf(msg,"Title: %s\nAuthors: %s\nYear: %d\nPath: %s", curr->file.title, curr->file.author, curr->file.year, curr->file.path);
-                    
-                    write(fd_to_client, msg, sizeof(msg));
-                    printf("Document with ID %d found in cache.\n", fileinfo.id);
-
-                    break;
+                    sprintf(msg,"Title: %s\nAuthors: %s\nYear: %d\nPath: %s\n", curr->file.title, curr->file.author, curr->file.year, curr->file.path);
+                    break;  
                 }
                 curr = curr->next;
+                
             }
 
+
             if (curr == NULL) {
-                printf("Document with ID %d not found in cache.\n", fileinfo.id);
+                
+                printf("Document with ID %d not found in cache.\n", fileinfo.index);
                 printf("Searching in storage...\n");
                 lseek(fd_file, 0, SEEK_SET); // going back to the start of the file
+                sprintf(msg,"didnt find nothing...\n");
             }
+            
+                    
+                    write(fd_to_client, msg, sizeof(msg));
+                    close(fd_to_client);
 
 
         } 
         
         else if (fileinfo.cmd[1] == 'd') {
 
-            printf("Removing document with ID: %d\n", fileinfo.id);
+            printf("Removing document with ID: %d\n", fileinfo.index);
             // Here we would call the function to remove the document
             // remove_document(fileinfo.id);
 
-            Linked* curr = cache[hash(fileinfo.id)];
-            Linked* prev = cache[hash(fileinfo.id)];
+            Linked* curr = cache[hash(fileinfo.index)];
+            Linked* prev = cache[hash(fileinfo.index)];
 
             if (curr == NULL) {
                 printf("Document with ID %d not found in cache.\n", fileinfo.id);
             }
 
-            else if (curr->file.id == fileinfo.id) {
-                cache[hash(fileinfo.id)] = curr->next; // removing the first element
+            else if (curr->file.id == fileinfo.index) {
+                cache[hash(fileinfo.index)] = curr->next; // removing the first element
                 free(curr);
-                printf("Document with ID %d removed from cache.\n", fileinfo.id);
+                printf("Document with ID %d removed from cache.\n", fileinfo.index);
             } 
             else {
                 prev = curr; // setting the previous element to the first oneeee
                 curr = curr->next; // moving to the next element
 
                 while (curr != NULL) {                  // traversing the cache on the hash index !!
-                    if (curr->file.id == fileinfo.id) {
+                    if (curr->file.id == fileinfo.index) {
                         prev->next = curr->next; // removing the element
                         free(curr);
-                        printf("Document with ID %d removed from cache.\n", fileinfo.id);
+                        printf("Document with ID %d removed from cache.\n", fileinfo.index);
                         break;
                     }
                     prev = curr;
@@ -154,7 +169,7 @@ int main(int argc, char * argv[]) {
                 }
 
                 if (curr == NULL) {
-                    printf("Document with ID %d not found in cache.\n", fileinfo.id);
+                    printf("Document with ID %d not found in cache.\n", fileinfo.index);
                 }
 
             }
