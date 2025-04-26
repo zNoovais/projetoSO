@@ -13,7 +13,7 @@ int main(int argc, char * argv[]) {
 
     int next_id = 0;
     int number_of_files = 0;
-
+    char msg[520];
    
     printf("Server started!\n");
 
@@ -91,7 +91,7 @@ int main(int argc, char * argv[]) {
             new_file->next = cache[hash(next_id)]; // hash function to get the index in the cache
             cache[hash(next_id)] = new_file; // adding the new file to the cache :DD
 
-            char msg[220];
+            
             sprintf(msg,"%d\n",next_id);
 
             next_id++;
@@ -106,7 +106,7 @@ int main(int argc, char * argv[]) {
         else if (fileinfo.cmd[1] == 'c') {
 
             printf("-C Consulting document with ID: %d\n", fileinfo.index);
-            char msg[520];
+            
             Linked* curr = cache[hash(fileinfo.index)];
             while (curr != NULL) {                  // traversing the cache on the hash index !!
                 
@@ -145,13 +145,15 @@ int main(int argc, char * argv[]) {
             Linked* prev = cache[hash(fileinfo.index)];
 
             if (curr == NULL) {
-                printf("Document with ID %d not found in cache.\n", fileinfo.id);
+                printf("Document with ID %d not found in cache.\n", fileinfo.index);
+                sprintf(msg,"document not found in cache\n");
             }
 
             else if (curr->file.id == fileinfo.index) {
                 cache[hash(fileinfo.index)] = curr->next; // removing the first element
                 free(curr);
                 printf("Document with ID %d removed from cache.\n", fileinfo.index);
+                sprintf(msg,"document found in cache\n");
             } 
             else {
                 prev = curr; // setting the previous element to the first oneeee
@@ -162,6 +164,7 @@ int main(int argc, char * argv[]) {
                         prev->next = curr->next; // removing the element
                         free(curr);
                         printf("Document with ID %d removed from cache.\n", fileinfo.index);
+                        sprintf(msg,"document found in cache\n");
                         break;
                     }
                     prev = curr;
@@ -170,9 +173,15 @@ int main(int argc, char * argv[]) {
 
                 if (curr == NULL) {
                     printf("Document with ID %d not found in cache.\n", fileinfo.index);
+                    sprintf(msg,"document not found in cache\n");
                 }
 
             }
+
+            write(fd_to_client, msg, sizeof(msg));
+            close(fd_to_client);
+
+           
 
             // Here we would call the function to remove the document from the storage file
             // remove_document_from_storage(fileinfo.id);     
@@ -229,6 +238,7 @@ int main(int argc, char * argv[]) {
 
             printf("Shutting down server...\n");
             server_open = 0;
+            break;
 
             // Here we have to rewrite the storage file with the new data
             
