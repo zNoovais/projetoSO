@@ -25,3 +25,5 @@ clean:
 	rm -f *.o server client 
 	rm -f pipe_to_server
 	rm -f fifo_client*
+	rm -f fifo_server
+	rm -f armazenamento

@@ -23,7 +23,7 @@ int main(int argc, char * argv[]) {
         return 1;
     } 
 
-    int fd_file_read = open(storage_path, O_RDONLY, 0600); // open the file to store the documents ezz
+    int fd_file_read = open(storage_path, O_RDWR, 0600); // open the file to store the documents ezz
     if (fd_file_read == -1) {
         perror("Error opening storage file");
         return 1;
@@ -185,22 +185,20 @@ int main(int argc, char * argv[]) {
         else if (fileinfo.cmd[1] == 'd') {
 
             printf("Removing document with ID: %d\n", fileinfo.index);
-            // Here we would call the function to remove the document
-            // remove_document(fileinfo.id);
+            
 
             Linked* curr = cache[hash(fileinfo.index)];
             Linked* prev = cache[hash(fileinfo.index)];
 
             if (curr == NULL) {
-                printf("Document with ID %d not found in cache.\n", fileinfo.index);
-                sprintf(msg,"document not found in cache\n");
+                printf("line have nothing!\n");
             }
 
             else if (curr->file.id == fileinfo.index) {
                 cache[hash(fileinfo.index)] = curr->next; // removing the first element
                 free(curr);
                 printf("Document with ID %d removed from cache.\n", fileinfo.index);
-                sprintf(msg,"document found in cache\n");
+                
             } 
             else {
                 prev = curr; // setting the previous element to the first oneeee
@@ -211,31 +209,48 @@ int main(int argc, char * argv[]) {
                         prev->next = curr->next; // removing the element
                         free(curr);
                         printf("Document with ID %d removed from cache.\n", fileinfo.index);
-                        sprintf(msg,"document found in cache\n");
+                        
                         break;
                     }
                     prev = curr;
                     curr = curr->next;
                 }
-
-                if (curr == NULL) {
-                    printf("Document with ID %d not found in cache.\n", fileinfo.index);
-                    sprintf(msg,"document not found in cache\n");
-                }
-
-                printf("Searching in the storage...");
-
-
-
             }
 
+            if (curr == NULL) {
+                printf("Document with ID %d not found in cache.\n", fileinfo.index);
+            }
+
+            printf("Searching in the storage...");
+
+            lseek(fd_file_read, 0, SEEK_SET); // going back to the start of the file
+                
+            indexed_file file_struct;
+
+            while((res = read(fd_file_read,&file_struct,sizeof(indexed_file))) > 0) {
+                    
+                if(file_struct.active && file_struct.id == fileinfo.index) {
+                    break;
+                }
+                    
+            }
+
+            if (res == 0) {
+                printf("nothing on storage too");
+                sprintf(msg,"didnt find nothing on the storage and cache\n");
+
+            }
+            else {
+                file_struct.active = 0;
+                lseek(fd_file_read,-sizeof(indexed_file),SEEK_CUR); //going back one space to rewrite the struct :D
+                write(fd_file_read,&file_struct,sizeof(indexed_file)); //Rewriting the struct!!!
+                sprintf(msg,"document found in storage\n");
+                
+                }
+            
+
             write(fd_to_client, msg, sizeof(msg));
-            close(fd_to_client);
-
-           
-
-            // Here we would call the function to remove the document from the storage file
-            // remove_document_from_storage(fileinfo.id);     
+            close(fd_to_client); 
         }
 
         else if (fileinfo.cmd[1] == 'l') { // ./dclient -l [n] [keyword]
@@ -295,21 +310,12 @@ int main(int argc, char * argv[]) {
             // Here we have to rewrite the storage file with the new data
             
         }
-
-            
-
-            
-         
-         
     
     
-
-
-
     
     }
 
-    //save part will be here
+    
 
     return 0;
 }

@@ -14,7 +14,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    char buffer[512] = "";
+    char buffer[512] = ""; 
     FileInfo fileinfo; // create a single fileinfo struct to use for all commands, because i dont want to creat the same struct over and over again 
     memset(&fileinfo, 0, sizeof(FileInfo)); // initializing the struct with zeros
 

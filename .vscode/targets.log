@@ -6,7 +6,7 @@ make all -f /home/novais/Transferências/Codigo/C/Sistemas Operativos/project/pr
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Wed Apr 30 14:07:20 2025
+# Make data base, printed on Wed Apr 30 21:03:57 2025
 
 # Variables
 
@@ -22,6 +22,8 @@ VSCODE_CWD = /home/novais
 GDM_LANG = pt_PT
 # default
 MAKE_COMMAND := make
+# environment
+APPLICATIONINSIGHTS_CONFIGURATION_CONTENT = {}
 # environment
 GTK3_MODULES = xapp-gtk3-module
 # environment
@@ -45,7 +47,7 @@ XDG_DATA_DIRS = /usr/share/xmonad:/home/novais/.local/share/flatpak/exports/shar
 # environment
 VSCODE_CODE_CACHE_PATH = /home/novais/.config/Code/CachedData/17baf841131aa23349f217ca7c570c76ee87b957
 # environment
-XDG_SESSION_PATH = /org/freedesktop/DisplayManager/Session0
+XDG_SESSION_PATH = /org/freedesktop/DisplayManager/Session1
 # environment
 LANG = C
 # environment
@@ -58,6 +60,8 @@ XAUTHORITY = /home/novais/.Xauthority
 MAKEFLAGS = pqrR
 # makefile
 CURDIR := /home/novais/Transferências/Codigo/C/Sistemas Operativos/project/projetoSO
+# environment
+APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = 1
 # environment
 VSCODE_L10N_BUNDLE_LOCATION = 
 # automatic
@@ -77,7 +81,7 @@ MAKEFILE_LIST := /home/novais/Transferências/Codigo/C/Sistemas Operativos/proje
 # automatic
 @F = $(notdir $@)
 # environment
-VSCODE_PID = 3097
+VSCODE_PID = 15278
 # environment
 XDG_SESSION_TYPE = x11
 # automatic
@@ -135,6 +139,7 @@ XDG_VTNR = 7
 # makefile
 .DEFAULT_GOAL := all
 # environment
+ 
 DISPLAY = :0
 # environment
 USER = novais
@@ -159,7 +164,7 @@ ELECTRON_RUN_AS_NODE = 1
 # environment
 VSCODE_IPC_HOOK = /run/user/1000/vscode-81b3b71e-1.99-main.sock
 # environment
-XDG_SESSION_ID = c2
+XDG_SESSION_ID = c4
 # default
 .RECIPEPREFIX := 
 # automatic
@@ -181,7 +186,7 @@ VSCODE_ESM_ENTRYPOINT = vs/workbench/api/node/extensionHostProcess
 # environment
 GDMSESSION = xmonad
 # variable set hash-table stats:
-# Load=85/1024=8%, Rehash=0, Collisions=4/115=3%
+# Load=87/1024=8%, Rehash=0, Collisions=4/117=3%
 
 # Pattern-specific Variable Values
 
@@ -200,7 +205,7 @@ GDMSESSION = xmonad
 
 functions.o: functions.c
 #  Implicit rule search has not been done.
-#  Last modified 2025-04-27 21:36:58.956026423
+#  Last modified 2025-04-30 21:00:03.287883908
 #  File has been updated.
 #  Successfully updated.
 #  recipe to execute (from '/home/novais/Transferências/Codigo/C/Sistemas Operativos/project/projetoSO/Makefile', line 19):
@@ -208,7 +213,7 @@ functions.o: functions.c
 
 client: client.o functions.o
 #  Implicit rule search has not been done.
-#  Last modified 2025-04-27 21:36:59.071281654
+#  Last modified 2025-04-30 21:00:03.415867791
 #  File has been updated.
 #  Successfully updated.
 #  recipe to execute (from '/home/novais/Transferências/Codigo/C/Sistemas Operativos/project/projetoSO/Makefile', line 10):
@@ -216,7 +221,7 @@ client: client.o functions.o
 
 client.o: dclient.c functions.o
 #  Implicit rule search has not been done.
-#  Last modified 2025-04-27 21:36:59.046433607
+#  Last modified 2025-04-30 21:00:03.381872072
 #  File has been updated.
 #  Successfully updated.
 #  recipe to execute (from '/home/novais/Transferências/Codigo/C/Sistemas Operativos/project/projetoSO/Makefile', line 16):
@@ -224,7 +229,7 @@ client.o: dclient.c functions.o
 
 server.o: dserver.c
 #  Implicit rule search has not been done.
-#  Last modified 2025-04-27 21:36:58.908359851
+#  Last modified 2025-04-30 21:00:03.228891337
 #  File has been updated.
 #  Successfully updated.
 #  recipe to execute (from '/home/novais/Transferências/Codigo/C/Sistemas Operativos/project/projetoSO/Makefile', line 13):
@@ -233,7 +238,7 @@ server.o: dserver.c
 # Not a target:
 /home/novais/Transferências/Codigo/C/Sistemas Operativos/project/projetoSO/Makefile:
 #  Implicit rule search has been done.
-#  Last modified 2025-04-26 23:31:11.32442995
+#  Last modified 2025-04-30 20:59:59.486364057
 #  File has been updated.
 #  Successfully updated.
 
@@ -245,10 +250,12 @@ clean:
 	rm -f *.o server client 
 	rm -f pipe_to_server
 	rm -f fifo_client*
+	rm -f fifo_server
+	rm -f armazenamento
 
 server: server.o functions.o
 #  Implicit rule search has not been done.
-#  Last modified 2025-04-27 21:36:59.006676732
+#  Last modified 2025-04-30 21:00:03.335877864
 #  File has been updated.
 #  Successfully updated.
 #  recipe to execute (from '/home/novais/Transferências/Codigo/C/Sistemas Operativos/project/projetoSO/Makefile', line 7):
@@ -263,7 +270,7 @@ server: server.o functions.o
 # Not a target:
 dserver.c:
 #  Implicit rule search has been done.
-#  Last modified 2025-04-27 00:05:07.925416283
+#  Last modified 2025-04-30 15:46:11.217260641
 #  File has been updated.
 #  Successfully updated.
 
@@ -284,7 +291,6 @@ dclient.c:
 # Not a target:
 functions.c:
 #  Implicit rule search has been done.
- 
 #  Last modified 2025-04-26 17:37:04.016297893
 #  File has been updated.
 #  Successfully updated.
@@ -310,6 +316,6 @@ pipe_to_server:
 # strcache performance: lookups = 35 / hit rate = 54%
 # hash-table stats:
 # Load=16/8192=0%, Rehash=0, Collisions=0/35=0%
-# Finished Make data base on Wed Apr 30 14:07:20 2025
+# Finished Make data base on Wed Apr 30 21:03:57 2025
 
  
