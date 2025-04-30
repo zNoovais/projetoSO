@@ -87,6 +87,7 @@ int main(int argc, char * argv[]) {
             printf("Indexing document: %s\n", fileinfo.title);
             
             Linked* new_file = malloc(sizeof(Linked));  
+            indexed_file file_struct;
 
             new_file->file.id = next_id;
             strcpy(new_file->file.title, fileinfo.title);
@@ -97,7 +98,18 @@ int main(int argc, char * argv[]) {
             new_file->next = cache[hash(next_id)]; // hash function to get the index in the cache
             cache[hash(next_id)] = new_file; // adding the new file to the cache :DD
 
+            //filling the struct to put on the storage
+            file_struct.active = 1;
+            file_struct.id = next_id;
+            strcpy(file_struct.title, fileinfo.title);
+            strcpy(file_struct.author, fileinfo.author);
+            file_struct.year = fileinfo.year;
+            strcpy(file_struct.path, fileinfo.path);
             
+
+            write(fd_file_write,&file_struct,sizeof(indexed_file));
+
+
             sprintf(msg,"%d\n",next_id);
 
             next_id++;
@@ -126,12 +138,41 @@ int main(int argc, char * argv[]) {
             }
 
 
-            if (curr == NULL) {
+            if (curr == NULL) { // didnt find it in the cache so its goint thru the storage.
                 
                 printf("Document with ID %d not found in cache.\n", fileinfo.index);
                 printf("Searching in storage...\n");
                 lseek(fd_file_read, 0, SEEK_SET); // going back to the start of the file
-                sprintf(msg,"didnt find nothing...\n");
+                
+                indexed_file file_struct;
+
+                while((res = read(fd_file_read,&file_struct,sizeof(indexed_file))) > 0) {
+                    
+                    if(file_struct.active && file_struct.id == fileinfo.index) {
+                        break;
+                    }
+                    
+                }
+
+                if (res == 0) {
+                    sprintf(msg,"didnt find nothing...\n");
+                }
+
+                else {
+                    sprintf(msg,"Title: %s\nAuthors: %s\nYear: %d\nPath: %s\n", file_struct.title ,file_struct.author, file_struct.year, file_struct.path);
+                    
+                    Linked* new_file = malloc(sizeof(Linked));  
+                    
+                    new_file->file.id = file_struct.id;
+                    strcpy(new_file->file.title, file_struct.title);
+                    strcpy(new_file->file.author, file_struct.author);
+                    new_file->file.year = file_struct.year;
+                    strcpy(new_file->file.path, file_struct.path);
+
+                    new_file->next = cache[hash(file_struct.id)]; // hash function to get the index in the cache
+                    cache[hash(file_struct.id)] = new_file; // adding the new file to the cache :DD
+
+                }
             }
             
                     
@@ -181,6 +222,10 @@ int main(int argc, char * argv[]) {
                     printf("Document with ID %d not found in cache.\n", fileinfo.index);
                     sprintf(msg,"document not found in cache\n");
                 }
+
+                printf("Searching in the storage...");
+
+
 
             }
 
