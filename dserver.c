@@ -17,8 +17,14 @@ int main(int argc, char * argv[]) {
    
     printf("Server started!\n");
 
-    int fd_file = open(storage_path, O_CREAT | O_RDWR, 0600); // open the file to store the documents ezz
-    if (fd_file == -1) {
+    int fd_file_write = open(storage_path, O_CREAT | O_APPEND | O_WRONLY, 0600);
+    if (fd_file_write == -1) {
+        perror("Error opening storage file to write");
+        return 1;
+    } 
+
+    int fd_file_read = open(storage_path, O_RDONLY, 0600); // open the file to store the documents ezz
+    if (fd_file_read == -1) {
         perror("Error opening storage file");
         return 1;
     }
@@ -26,10 +32,10 @@ int main(int argc, char * argv[]) {
     indexed_file file;
 
     ssize_t bytes_read;
-    while ((bytes_read = read(fd_file, &file, sizeof(file))) > 0) { // checking the number of files and the next id
+    while ((bytes_read = read(fd_file_read, &file, sizeof(file))) > 0) { // checking the number of files and the next id
         if (bytes_read == -1) {
             perror("Error reading from storage file");
-            close(fd_file);
+            close(fd_file_read);
             return 1;
         }
         
@@ -40,7 +46,7 @@ int main(int argc, char * argv[]) {
     }
     
     
-    lseek(fd_file, 0, SEEK_SET); // going back to the start of the file :)
+    lseek(fd_file_read, 0, SEEK_SET); // going back to the start of the file :)
 
 
     if ((mkfifo(PIPE_TO_SERVER,0600))==-1) //pipe to server
@@ -124,7 +130,7 @@ int main(int argc, char * argv[]) {
                 
                 printf("Document with ID %d not found in cache.\n", fileinfo.index);
                 printf("Searching in storage...\n");
-                lseek(fd_file, 0, SEEK_SET); // going back to the start of the file
+                lseek(fd_file_read, 0, SEEK_SET); // going back to the start of the file
                 sprintf(msg,"didnt find nothing...\n");
             }
             
@@ -206,7 +212,7 @@ int main(int argc, char * argv[]) {
             if (curr == NULL) {
                 printf("Document with ID %d not found in cache.\n", fileinfo.id);
                 printf("Searching in storage...\n");
-                lseek(fd_file, 0, SEEK_SET); // going back to the start of the file
+                lseek(fd_file_read, 0, SEEK_SET); // going back to the start of the file
             }
                 //after i find in the storage i want to add it to the cache
                 // and then i want to search for the keyword in the document

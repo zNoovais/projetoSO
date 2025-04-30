@@ -6,7 +6,7 @@ make all -f /home/novais/Transferências/Codigo/C/Sistemas Operativos/project/pr
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Sat Apr 26 20:25:18 2025
+# Make data base, printed on Wed Apr 30 14:07:20 2025
 
 # Variables
 
@@ -15,8 +15,6 @@ GDK_BACKEND = x11
 # environment
 LC_ALL = C
 # environment
-GJS_DEBUG_OUTPUT = stderr
-# environment
 VSCODE_CRASH_REPORTER_PROCESS_TYPE = extensionHost
 # environment
 VSCODE_CWD = /home/novais
@@ -24,8 +22,6 @@ VSCODE_CWD = /home/novais
 GDM_LANG = pt_PT
 # default
 MAKE_COMMAND := make
-# environment
-APPLICATIONINSIGHTS_CONFIGURATION_CONTENT = {}
 # environment
 GTK3_MODULES = xapp-gtk3-module
 # environment
@@ -41,7 +37,7 @@ PWD = /home/novais/Transferências/Codigo/C/Sistemas Operativos/project/projetoS
 # automatic
 %D = $(patsubst %/,%,$(dir $%))
 # environment
-XDG_DATA_DIRS = /usr/share/cinnamon:/usr/share/gnome:/home/novais/.local/share/flatpak/exports/share:/var/lib/flatpak/exports/share:/usr/local/share:/usr/share
+XDG_DATA_DIRS = /usr/share/xmonad:/home/novais/.local/share/flatpak/exports/share:/var/lib/flatpak/exports/share:/usr/local/share:/usr/share
 # automatic
 ^D = $(patsubst %/,%,$(dir $^))
 # automatic
@@ -63,38 +59,29 @@ MAKEFLAGS = pqrR
 # makefile
 CURDIR := /home/novais/Transferências/Codigo/C/Sistemas Operativos/project/projetoSO
 # environment
-APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = 1
-# environment
-LESSOPEN = | /usr/bin/lesspipe %s
- 
-# environment
 VSCODE_L10N_BUNDLE_LOCATION = 
 # automatic
 *D = $(patsubst %/,%,$(dir $*))
 # environment
 MFLAGS = -pqrR
-# environment
-SSH_AUTH_SOCK = /run/user/1000/keyring/ssh
 # default
 .SHELLFLAGS := -c
 # environment
-XDG_CONFIG_DIRS = /etc/xdg/xdg-cinnamon:/etc/xdg
+XDG_CONFIG_DIRS = /etc/xdg/xdg-xmonad:/etc/xdg
 # automatic
 +D = $(patsubst %/,%,$(dir $+))
 # environment
-XDG_SESSION_DESKTOP = cinnamon
+XDG_SESSION_DESKTOP = xmonad
 # makefile (from '/home/novais/Transferências/Codigo/C/Sistemas Operativos/project/projetoSO/Makefile', line 1)
 MAKEFILE_LIST := /home/novais/Transferências/Codigo/C/Sistemas Operativos/project/projetoSO/Makefile
 # automatic
 @F = $(notdir $@)
 # environment
-VSCODE_PID = 2369
+VSCODE_PID = 3097
 # environment
 XDG_SESSION_TYPE = x11
 # automatic
 ?D = $(patsubst %/,%,$(dir $?))
-# environment
-SESSION_MANAGER = local/novaisBOOK:@/tmp/.ICE-unix/1567,unix/novaisBOOK:/tmp/.ICE-unix/1567
 # automatic
 *F = $(notdir $*)
 # environment
@@ -109,52 +96,40 @@ DBUS_SESSION_BUS_ADDRESS = unix:path=/run/user/1000/bus
 VSCODE_NLS_CONFIG = {"userLocale":"en","osLocale":"pt","resolvedLanguage":"en","defaultMessagesFile":"/usr/share/code/resources/app/out/nls.messages.json","locale":"en","availableLanguages":{}}
 # default
 MAKE_HOST := x86_64-pc-linux-gnu
-# environment
-GNOME_DESKTOP_SESSION_ID = this-is-deprecated
 # makefile
 SHELL = /bin/sh
 # default
 MAKECMDGOALS := all
 # environment
-GJS_DEBUG_TOPICS = JS ERROR;JS LOG
-# environment
-SHLVL = 0
+SHLVL = 1
 # environment
 MAKELEVEL := 0
 # default
 MAKE = $(MAKE_COMMAND)
 # environment
-PATH = /home/novais/.local/share/solana/install/active_release/bin:/home/novais/.local/bin:/home/novais/.cabal/bin:/home/novais/.ghcup/bin:/home/novais/.local/share/solana/install/active_release/bin:/home/novais/.cargo/bin:/home/novais/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/home/novais/.local/bin:/home/novais/.local/bin:/home/novais/.local/bin
+PATH = /home/novais/.local/share/solana/install/active_release/bin:/home/novais/.cargo/bin:/home/novais/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/home/novais/.local/bin
 # default
 MAKEFILES := 
 # environment
 LANGUAGE = pt:pt_BR:en
 # automatic
 ^F = $(notdir $^)
-# environment
-CINNAMON_VERSION = 6.0.4
-# environment
-LESSCLOSE = /usr/bin/lesspipe %s %s
 # automatic
 ?F = $(notdir $?)
 # environment
 XDG_SEAT = seat0
-# environment
-XDG_CURRENT_DESKTOP = X-Cinnamon
 # automatic
 +F = $(notdir $+)
 # environment
 XDG_SEAT_PATH = /org/freedesktop/DisplayManager/Seat0
 # environment
-DESKTOP_SESSION = cinnamon
+DESKTOP_SESSION = xmonad
 # environment
-ORIGINAL_XDG_CURRENT_DESKTOP = X-Cinnamon
+ORIGINAL_XDG_CURRENT_DESKTOP = undefined
 # 'override' directive
 GNUMAKEFLAGS := 
 # environment
 LOGNAME = novais
-# environment
-GIO_LAUNCHED_DESKTOP_FILE = /usr/share/applications/code.desktop
 # environment
 XDG_VTNR = 7
 # makefile
@@ -168,9 +143,7 @@ GTK_MODULES = gail:atk-bridge
 # default
 MAKE_VERSION := 4.3
 # environment
-GIO_LAUNCHED_DESKTOP_FILE_PID = 2369
-# environment
-_ = /usr/share/code/code
+_ = /usr/bin/code
 # environment
 XDG_RUNTIME_DIR = /run/user/1000
 # makefile (from '/home/novais/Transferências/Codigo/C/Sistemas Operativos/project/projetoSO/Makefile', line 2)
@@ -194,6 +167,10 @@ XDG_SESSION_ID = c2
 # default
 SUFFIXES := 
 # environment
+VSCODE_CLI = 1
+# environment
+ELECTRON_NO_ATTACH_CONSOLE = 1
+# environment
 XDG_GREETER_DATA_DIR = /var/lib/lightdm-data/novais
 # default
 .FEATURES := target-specific order-only second-expansion else-if shortest-stem undefine oneshell nocomment grouped-target extra-prereqs archives jobserver output-sync check-symlink load
@@ -202,9 +179,9 @@ CC = gcc
 # environment
 VSCODE_ESM_ENTRYPOINT = vs/workbench/api/node/extensionHostProcess
 # environment
-GDMSESSION = cinnamon
+GDMSESSION = xmonad
 # variable set hash-table stats:
-# Load=96/1024=9%, Rehash=0, Collisions=4/131=3%
+# Load=85/1024=8%, Rehash=0, Collisions=4/115=3%
 
 # Pattern-specific Variable Values
 
@@ -223,48 +200,31 @@ GDMSESSION = cinnamon
 
 functions.o: functions.c
 #  Implicit rule search has not been done.
-#  Implicit/static pattern stem: ''
-#  File does not exist.
+#  Last modified 2025-04-27 21:36:58.956026423
 #  File has been updated.
-#  Needs to be updated (-q is set).
-# automatic
-# @ := functions.o
-# automatic
-# * := 
-# automatic
-# < := functions.c
-# automatic
-# + := functions.c
-# automatic
-# % := 
-# automatic
-# ^ := functions.c
-# automatic
-# ? := functions.c
-# automatic
-# | := 
-# variable set hash-table stats:
-# Load=8/32=25%, Rehash=0, Collisions=2/13=15%
+#  Successfully updated.
 #  recipe to execute (from '/home/novais/Transferências/Codigo/C/Sistemas Operativos/project/projetoSO/Makefile', line 19):
 	$(CC) $(CFLAGS) -c functions.c
 
 client: client.o functions.o
 #  Implicit rule search has not been done.
-#  Modification time never checked.
-#  File has not been updated.
+#  Last modified 2025-04-27 21:36:59.071281654
+#  File has been updated.
+#  Successfully updated.
 #  recipe to execute (from '/home/novais/Transferências/Codigo/C/Sistemas Operativos/project/projetoSO/Makefile', line 10):
 	$(CC) $(CFLAGS) -o client client.o functions.o
 
 client.o: dclient.c functions.o
 #  Implicit rule search has not been done.
-#  Modification time never checked.
-#  File has not been updated.
+#  Last modified 2025-04-27 21:36:59.046433607
+#  File has been updated.
+#  Successfully updated.
 #  recipe to execute (from '/home/novais/Transferências/Codigo/C/Sistemas Operativos/project/projetoSO/Makefile', line 16):
 	$(CC) $(CFLAGS) -c dclient.c -o client.o
 
 server.o: dserver.c
 #  Implicit rule search has not been done.
-#  Last modified 2025-04-26 20:25:09.225147614
+#  Last modified 2025-04-27 21:36:58.908359851
 #  File has been updated.
 #  Successfully updated.
 #  recipe to execute (from '/home/novais/Transferências/Codigo/C/Sistemas Operativos/project/projetoSO/Makefile', line 13):
@@ -273,7 +233,7 @@ server.o: dserver.c
 # Not a target:
 /home/novais/Transferências/Codigo/C/Sistemas Operativos/project/projetoSO/Makefile:
 #  Implicit rule search has been done.
-#  Last modified 2025-04-26 20:24:39.010964518
+#  Last modified 2025-04-26 23:31:11.32442995
 #  File has been updated.
 #  Successfully updated.
 
@@ -288,11 +248,9 @@ clean:
 
 server: server.o functions.o
 #  Implicit rule search has not been done.
-#  Last modified 2025-04-26 20:25:09.225147614
+#  Last modified 2025-04-27 21:36:59.006676732
 #  File has been updated.
-#  Needs to be updated (-q is set).
-# variable set hash-table stats:
-# Load=0/32=0%, Rehash=0, Collisions=0/5=0%
+#  Successfully updated.
 #  recipe to execute (from '/home/novais/Transferências/Codigo/C/Sistemas Operativos/project/projetoSO/Makefile', line 7):
 	$(CC) $(CFLAGS) -o server server.o functions.o
 
@@ -305,7 +263,7 @@ server: server.o functions.o
 # Not a target:
 dserver.c:
 #  Implicit rule search has been done.
-#  Last modified 2025-04-26 20:25:09.225147614
+#  Last modified 2025-04-27 00:05:07.925416283
 #  File has been updated.
 #  Successfully updated.
 
@@ -314,28 +272,22 @@ all: server client
 #  Implicit rule search has been done.
 #  File does not exist.
 #  File has been updated.
-#  Needs to be updated (-q is set).
-# variable set hash-table stats:
-# Load=0/32=0%, Rehash=0, Collisions=0/5=0%
+#  Successfully updated.
 
 # Not a target:
 dclient.c:
-#  Implicit rule search has not been done.
-#  Modification time never checked.
-#  File has not been updated.
-
-# Not a target:
-functions.c:
 #  Implicit rule search has been done.
-#  Last modified 2025-04-26 17:37:04.016297893
+#  Last modified 2025-04-27 00:07:29.975154592
 #  File has been updated.
 #  Successfully updated.
 
 # Not a target:
-.SUFFIXES:
-#  Implicit rule search has not been done.
-#  Modification time never checked.
-#  File has not been updated.
+functions.c:
+#  Implicit rule search has been done.
+ 
+#  Last modified 2025-04-26 17:37:04.016297893
+#  File has been updated.
+#  Successfully updated.
 
 pipe_to_server:
 #  Implicit rule search has not been done.
@@ -345,7 +297,7 @@ pipe_to_server:
 	mkfifo pipe_to_server
 
 # files hash-table stats:
-# Load=14/1024=1%, Rehash=0, Collisions=1/41=2%
+# Load=14/1024=1%, Rehash=0, Collisions=1/40=2%
 # VPATH Search Paths
 
 # No 'vpath' search paths.
@@ -355,10 +307,9 @@ pipe_to_server:
 # strcache buffers: 1 (0) / strings = 16 / storage = 237 B / avg = 14 B
 # current buf: size = 8162 B / used = 237 B / count = 16 / avg = 14 B
 
-# strcache performance: lookups = 36 / hit rate = 55%
+# strcache performance: lookups = 35 / hit rate = 54%
 # hash-table stats:
- 
-# Load=16/8192=0%, Rehash=0, Collisions=0/36=0%
-# Finished Make data base on Sat Apr 26 20:25:18 2025
+# Load=16/8192=0%, Rehash=0, Collisions=0/35=0%
+# Finished Make data base on Wed Apr 30 14:07:20 2025
 
  
