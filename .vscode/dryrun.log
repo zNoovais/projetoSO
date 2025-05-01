@@ -1,5 +1,9 @@
-make -f /home/novais/Transferências/Codigo/C/Sistemas Operativos/project/projetoSO/Makefile --dry-run --keep-going --print-directory
+make -f /home/novais/Transferências/Codigo/C/Sistemas Operativos/project/projetoSO/Makefile --dry-run --always-make --keep-going --print-directory
 make: Entering directory '/home/novais/Transferências/Codigo/C/Sistemas Operativos/project/projetoSO'
-make: Nothing to be done for 'all'.
+gcc -Wall -g -c dserver.c -o server.o
+gcc -Wall -g -c functions.c
+gcc -Wall -g -o server server.o functions.o
+gcc -Wall -g -c dclient.c -o client.o
+gcc -Wall -g -o client client.o functions.o
 make: Leaving directory '/home/novais/Transferências/Codigo/C/Sistemas Operativos/project/projetoSO'
  

@@ -5,7 +5,7 @@
 
 int main(int argc, char * argv[]) {
 
-    
+      
     Linked* cache[CACHE_SIZE]; //creating the cache
     for (int i = 0; i < CACHE_SIZE; i++) {
         cache[i] = NULL;
@@ -40,7 +40,7 @@ int main(int argc, char * argv[]) {
         }
         
         number_of_files++;
-        if (file.id >= next_id) {
+        if (file.active && file.id >= next_id) {
             next_id = file.id + 1;
         }
     }
@@ -304,10 +304,24 @@ int main(int argc, char * argv[]) {
 
             printf("Shutting down server...\n");
             server_open = 0;
-            close(fd_to_server);
+
+            lseek(fd_file_read,0,SEEK_SET);
+            lseek(fd_file_write,0,SEEK_SET);
+
+            indexed_file file_struct;
+
+            while((res = read(fd_file_read,&file_struct,sizeof(indexed_file))) > 0) {
+                    
+                if(file_struct.active) {
+                    //write()
+                }
+                    
+            }
+
             
 
-            // Here we have to rewrite the storage file with the new data
+            close(fd_to_server);
+            
             
         }
     
