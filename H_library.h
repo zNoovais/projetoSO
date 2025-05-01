@@ -51,3 +51,5 @@ typedef struct LinkedList {
 } Linked;
 
 int hash(int key);
+
+void freeL(Linked *link);

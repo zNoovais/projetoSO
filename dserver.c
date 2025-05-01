@@ -17,7 +17,7 @@ int main(int argc, char * argv[]) {
    
     printf("Server started!\n");
 
-    int fd_file_write = open(storage_path, O_CREAT | O_APPEND | O_WRONLY, 0600);
+    int fd_file_write = open(storage_path, O_CREAT | O_APPEND | O_RDWR, 0600);
     if (fd_file_write == -1) {
         perror("Error opening storage file to write");
         return 1;
@@ -88,6 +88,8 @@ int main(int argc, char * argv[]) {
             
             Linked* new_file = malloc(sizeof(Linked));  
             indexed_file file_struct;
+
+            number_of_files++;
 
             new_file->file.id = next_id;
             strcpy(new_file->file.title, fileinfo.title);
@@ -241,6 +243,7 @@ int main(int argc, char * argv[]) {
 
             }
             else {
+                number_of_files--;
                 file_struct.active = 0;
                 lseek(fd_file_read,-sizeof(indexed_file),SEEK_CUR); //going back one space to rewrite the struct :D
                 write(fd_file_read,&file_struct,sizeof(indexed_file)); //Rewriting the struct!!!
@@ -310,15 +313,21 @@ int main(int argc, char * argv[]) {
 
             indexed_file file_struct;
 
-            while((res = read(fd_file_read,&file_struct,sizeof(indexed_file))) > 0) {
+            while((res = read(fd_file_read,&file_struct,sizeof(indexed_file))) > 0) { // this is crazy but its basically writing the active content on the left!
                     
                 if(file_struct.active) {
-                    //write()
+                    write(fd_file_write,&file_struct,sizeof(indexed_file));
                 }
                     
             }
 
+            printf("alo");
             
+            ftruncate(fd_file_write,0); // ok this its going to eliminate all content on the right of the fd_file_write
+            
+            for(int i = 0; i < CACHE_SIZE; i++) { // freeing all memory :D
+                freeL(cache[i]);
+            }       
 
             close(fd_to_server);
             

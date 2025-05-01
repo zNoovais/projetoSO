@@ -173,3 +173,21 @@ void list_documents_with_keyword(const char *keyword) {
 int hash (int key) {
     return key % CACHE_SIZE;
 }
+
+void freeL(Linked *link) {
+
+    if (!link) {
+        return;
+    }
+
+    Linked *atual = link;
+
+    Linked *pre;
+
+    while(atual) {
+        pre = atual->next;
+        free(atual);
+        atual = pre;
+    }
+
+}
