@@ -308,30 +308,55 @@ int main(int argc, char * argv[]) {
             printf("Shutting down server...\n");
             server_open = 0;
 
-            lseek(fd_file_read,0,SEEK_SET);
-            lseek(fd_file_write,0,SEEK_SET);
-
+            
             indexed_file file_struct;
 
-            while((res = read(fd_file_read,&file_struct,sizeof(indexed_file))) > 0) { // this is crazy but its basically writing the active content on the left!
-                    
-                if(file_struct.active) {
-                    write(fd_file_write,&file_struct,sizeof(indexed_file));
+            
+            lseek(fd_file_read, 0, SEEK_SET);
+            lseek(fd_file_write, 0, SEEK_SET);
+
+            int fd_new = open("temp",O_CREAT | O_TRUNC | O_WRONLY, 0600);
+
+            while ((res = read(fd_file_read, &file_struct, sizeof(indexed_file))) > 0) {
+                if (res == -1) {
+                    perror("Error reading from storage file");
+                    close(fd_file_read);
+                    close(fd_file_write); 
+                    return 1;
                 }
+
+                if (file_struct.active) {
+                    // Write the active file to the new file
+                    if (write(fd_new, &file_struct, sizeof(indexed_file)) == -1) {
+                        perror("Error writing to new storage file");
+                        close(fd_new);
+                        close(fd_file_read);
+                        close(fd_file_write); 
+                        return 1;
+                    }
                     
+                }
             }
 
-            printf("alo");
-            
-            ftruncate(fd_file_write,0); // ok this its going to eliminate all content on the right of the fd_file_write
-            
-            for(int i = 0; i < CACHE_SIZE; i++) { // freeing all memory :D
+        
+            ftruncate(fd_file_write, 0); //
+        
+            // cleaning the cache
+            for (int i = 0; i < CACHE_SIZE; i++) {
                 freeL(cache[i]);
-            }       
+            }
+            
+            rename("temp", storage_path); //closing everything dear god 
+            close(fd_new);
+            close(fd_file_read);
+            close(fd_file_write);
+            unlink(PIPE_TO_SERVER); 
+            close(fd_to_server); 
+            close(fd_file_read); 
+            close(fd_file_write); 
+            printf("Server shut down successfully.\n");
+            return 0;
 
-            close(fd_to_server);
-            
-            
         }
     
     
@@ -339,6 +364,6 @@ int main(int argc, char * argv[]) {
     }
 
     
-
+    close(fd_to_server);
     return 0;
 }
