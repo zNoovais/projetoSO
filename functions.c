@@ -106,73 +106,240 @@ void remove_document_metadata(int key) {
 // 1. Make it more friendly ( use more functions that are knows for us, instead of some "weird" functions )
 // 2. This function will work in the server, but we have to send the return value to the client, and then the 
 // client have to print it.
-int count_lines_with_keyword(int key, const char *keyword) {
-    Document *curr = doc_list;
-    while (curr != NULL) {
-        if (curr->id == key) {
-            int fd = open(curr->path, O_RDONLY);
-            if (fd < 0) {
-                perror("open");
-                return -1;
-            }
 
-            char buffer[4096];
-            ssize_t bytes_read;
-            int lines_with_keyword = 0;
-            //char *line_start = buffer;
-            size_t total = 0;
+// samir's note: im going to work on -l 
 
-            while ((bytes_read = read(fd, buffer + total, sizeof(buffer) - total - 1)) > 0) {
-                buffer[total + bytes_read] = '\0';
-                char *line = strtok(buffer, "\n");
-                while (line != NULL) {
-                    if (strstr(line, keyword) != NULL) {
-                        lines_with_keyword++;
-                    }
-                    line = strtok(NULL, "\n");
-                }
-                total = 0;
-            }
-            close(fd);
-            return lines_with_keyword;
+// int count_lines_with_keyword(int key, const char *keyword) {
+//     Document *curr = doc_list;
+//     while (curr != NULL) {
+//         if (curr->id == key) {
+//             int fd = open(curr->path, O_RDONLY);
+//             if (fd < 0) {
+//                 perror("open");
+//                 return -1;
+//             }
+
+//             char buffer[4096];
+//             ssize_t bytes_read;
+//             int lines_with_keyword = 0;
+//             //char *line_start = buffer;
+//             size_t total = 0;
+
+//             while ((bytes_read = read(fd, buffer + total, sizeof(buffer) - total - 1)) > 0) {
+//                 buffer[total + bytes_read] = '\0';
+//                 char *line = strtok(buffer, "\n");
+//                 while (line != NULL) {
+//                     if (strstr(line, keyword) != NULL) {
+//                         lines_with_keyword++;
+//                     }
+//                     line = strtok(NULL, "\n");
+//                 }
+//                 total = 0;
+//             }
+//             close(fd);
+//             return lines_with_keyword;
+//         }
+//         curr = curr->next;
+//     }
+//     return -1;
+// }
+
+
+//================================================================================================================================================================
+            // the shit i made ::::::::::
+
+
+//-s without the n after keyword
+void search_keyword_without_processes(const char *keyword) {
+    int MAX_FILES=2220, MAX_FILENAME=2220, searchers=4;   
+    const char *folder = "Gdataset";
+    char files[MAX_FILES][MAX_FILENAME];
+    int file_count = 0;
+
+    // step 1: parent collects all .txt files
+    DIR *dir = opendir(folder);
+    if (!dir) { perror("opendir"); exit(1); }
+    struct dirent *entry;
+    while ((entry = readdir(dir)) != NULL && file_count < MAX_FILES) {
+        int len = strlen(entry->d_name);
+        if (len > 4 && strcmp(entry->d_name + len - 4, ".txt") == 0) {
+            snprintf(files[file_count++], MAX_FILENAME, "%s/%s", folder, entry->d_name);
         }
-        curr = curr->next;
     }
-    return -1;
-}
+    closedir(dir);
 
-// Command -s
-// This function is bad ( Sorry !!! ). 1. We have to decide if we are going to return a String, then we send
-// it to the client, and then the client print it ( It would be a String that in the beggining there is a "[" and 
-// at the end there is a "]". If you guys want, we can choose other approach to this function.
-void list_documents_with_keyword(const char *keyword) {
-    Document *curr = doc_list;
-    int first = 1;
+    // pipe for each child to send results to parent
+    int pipes[searchers][2];
 
-    printf("[");
-    while (curr != NULL) {
-        char command[512];
-        snprintf(command, sizeof(command), "grep -q \"%s\" \"%s\"", keyword, curr->path);
-        int result = system(command);
+    // step 2: fork children and assign files
+    for (int i = 0; i < searchers; i++) {
+        if (pipe(pipes[i]) == -1) { perror("pipe"); exit(1); }
+        pid_t pid = fork();
+        if (pid == 0) {
+            // child
+            close(pipes[i][0]); // close read end
 
-        if (WIFEXITED(result) && WEXITSTATUS(result) == 0) {
-            if (!first) {
-                printf(", ");
+            int found_ids[MAX_FILES];
+            int found_count = 0;
+
+            for (int j = i; j < file_count; j += searchers) {
+                // inline file_contains_word logic
+                FILE *fp = fopen(files[j], "r");
+                if (fp) {
+                    char line[4096];
+                    int found = 0;
+                    while (fgets(line, sizeof(line), fp)) {
+                        if (strstr(line, keyword)) {
+                            found = 1;
+                            break;
+                        }
+                    }
+                    fclose(fp);
+                    if (found) {
+                        found_ids[found_count++] = j + 1; // IDs start at 1
+                    }
+                }
             }
-            printf("%d", curr->id);
-            first = 0;
-        }
 
-        curr = curr->next;
+            // write found_count and then all found_ids to pipe
+            write(pipes[i][1], &found_count, sizeof(int));
+            if (found_count > 0) {
+                write(pipes[i][1], found_ids, found_count * sizeof(int));
+            }
+            close(pipes[i][1]);
+            exit(0);
+        } else {
+            close(pipes[i][1]); // parent closes write end
+        }
+    }
+
+    // Step 3: parent waits and collects all IDs
+    int all_ids[MAX_FILES];
+    int all_count = 0;
+
+    for (int i = 0; i < searchers; i++) {
+        int found_count = 0;
+        read(pipes[i][0], &found_count, sizeof(int));
+        if (found_count > 0) {
+            int ids[found_count];
+            read(pipes[i][0], ids, found_count * sizeof(int));
+            for (int k = 0; k < found_count; k++) {
+                all_ids[all_count++] = ids[k];
+            }
+        }
+        close(pipes[i][0]);
+    }
+
+    // wait for all children
+    for (int i = 0; i < searchers; i++) wait(NULL);
+
+    // step 4: print all IDs in the required format
+    printf("[");
+    for (int i = 0; i < all_count; i++) {
+        printf("%d", all_ids[i]);
+        if (i != all_count - 1) printf(",");
     }
     printf("]\n");
 }
 
-// Command -f : I didn't do yet, because I think it depends a lot on how the server is built.
+//dick
+//================================================================================================================================================================
 
-int hash (int key) {
-    return key % CACHE_SIZE;
+void search_keyword_with_processes(const char *keyword, int n){
+    int MAX_FILES=2220, MAX_FILENAME=2220, searchers=n;   
+    const char *folder = "Gdataset";
+    char files[MAX_FILES][MAX_FILENAME];
+    int file_count = 0;
+
+    // step 1: parent collects all .txt files
+    DIR *dir = opendir(folder);
+    if (!dir) { perror("opendir"); exit(1); }
+    struct dirent *entry;
+    while ((entry = readdir(dir)) != NULL && file_count < MAX_FILES) {
+        int len = strlen(entry->d_name);
+        if (len > 4 && strcmp(entry->d_name + len - 4, ".txt") == 0) {
+            snprintf(files[file_count++], MAX_FILENAME, "%s/%s", folder, entry->d_name);
+        }
+    }
+    closedir(dir);
+
+    // pipe for each child to send results to parent
+    int pipes[searchers][2];
+
+    // step 2: Fork children and assign files
+    for (int i = 0; i < searchers; i++) {
+        if (pipe(pipes[i]) == -1) { perror("pipe"); exit(1); }
+        pid_t pid = fork();
+        if (pid == 0) {
+            // child
+            close(pipes[i][0]); // close read end
+
+            int found_ids[MAX_FILES];
+            int found_count = 0;
+
+            for (int j = i; j < file_count; j += searchers) {
+                // inline file_contains_word logic
+                FILE *fp = fopen(files[j], "r");
+                if (fp) {
+                    char line[4096];
+                    int found = 0;
+                    while (fgets(line, sizeof(line), fp)) {
+                        if (strstr(line, keyword)) {
+                            found = 1;
+                            break;
+                        }
+                    }
+                    fclose(fp);
+                    if (found) {
+                        found_ids[found_count++] = j + 1; // IDs start at 1
+                    }
+                }
+            }
+
+            // write found_count and then all found_ids to pipe
+            write(pipes[i][1], &found_count, sizeof(int));
+            if (found_count > 0) {
+                write(pipes[i][1], found_ids, found_count * sizeof(int));
+            }
+            close(pipes[i][1]);
+            exit(0);
+        } else {
+            close(pipes[i][1]); // parent closes write end
+        }
+    }
+
+    // step 3: parent waits and collects all IDs
+    int all_ids[MAX_FILES];
+    int all_count = 0;
+
+    for (int i = 0; i < searchers; i++) {
+        int found_count = 0;
+        read(pipes[i][0], &found_count, sizeof(int));
+        if (found_count > 0) {
+            int ids[found_count];
+            read(pipes[i][0], ids, found_count * sizeof(int));
+            for (int k = 0; k < found_count; k++) {
+                all_ids[all_count++] = ids[k];
+            }
+        }
+        close(pipes[i][0]);
+    }
+
+    // wait for all children
+    for (int i = 0; i < searchers; i++) wait(NULL);
+
+    // step 4: print all IDs in the required format
+    printf("[");
+    for (int i = 0; i < all_count; i++) {
+        printf("%d", all_ids[i]);
+        if (i != all_count - 1) printf(",");
+    }
+    printf("]\n");
+  
 }
+
+
+
 
 void freeL(Linked *link) {
 

@@ -285,25 +285,26 @@ int main(int argc, char * argv[]) {
 
         } 
         
-        else if (fileinfo.cmd[1] == 's') {  // this function its tricky because we have to search in tghe cache and in the storage
-            
-            printf("Searching for keyword: %s\n", fileinfo.word);
-            
-            if (fileinfo.cmd[2] == '1') {
+        else if (fileinfo.cmd[1] == 's') {  // this function its tricky because we have to search in the cache and in the storage
 
-                printf("Searching with processes...\n");
-                // Here we would call the function to search for a keyword with processes
-                // search_keyword_with_processes(fileinfo.keyword, fileinfo.id);
-                
+        
+            printf("Searching for keyword: \"%s\"\n", fileinfo.word);
+            
+            if (fileinfo.processes > 1) {
+                printf("Searching for word [%s] with %d processes...\n", fileinfo.word, fileinfo.processes);
+                search_keyword_with_processes(fileinfo.word, fileinfo.processes);
             } else {
-                
-                printf("Searching without processes...\n");
-                // Here we would call the function to search for a keyword without processes
-                // search_keyword_without_processes(fileinfo.keyword);
+                printf("Searching for word [%s] without processes...\n",fileinfo.word);
+
+                search_keyword_without_processes(fileinfo.word);
             }
-
-
-        } else if (fileinfo.cmd[1] == 'f') {
+            
+            write(fd_to_client, msg, sizeof(msg));
+            close(fd_to_client);
+            
+        }  
+        
+        else if (fileinfo.cmd[1] == 'f') {
 
             printf("Shutting down server...\n");
             server_open = 0;

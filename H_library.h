@@ -53,3 +53,5 @@ typedef struct LinkedList {
 int hash(int key);
 
 void freeL(Linked *link);
+void search_keyword_without_processes(const char *word);
+void search_keyword_with_processes (const char *word, int n);
