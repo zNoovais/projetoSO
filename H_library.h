@@ -36,6 +36,7 @@ typedef struct FileInfo { //this should not exceed 512bytes
 } FileInfo;
 
 
+
 typedef struct indexed_file {
     int active;
     int id;
@@ -50,4 +51,22 @@ typedef struct LinkedList {
     struct LinkedList *next;
 } Linked;
 
+
+
+void freeL(Linked *link);
+
 int hash(int key);
+int index_document(const char *title, const char *authors, const char *year, const char *path);
+void consult_document(int key);
+void remove_document_metadata(int key);
+int count_lines_with_keyword(int key, const char *keyword);
+void list_documents_with_keyword(const char *keyword);
+
+//-s
+// Modified function declaration to accept cache as a parameter
+void search_keyword_without_processes(const char *word, Linked* cache[CACHE_SIZE]);
+void search_keyword_with_processes(const char *word, Linked* cache[CACHE_SIZE], int n);
+
+//-l
+void search_keyword_in_document(int doc_id, const char *word, Linked* cache[CACHE_SIZE]);
+

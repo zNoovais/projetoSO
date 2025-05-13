@@ -1,22 +1,30 @@
 #include "H_library.h"
 
 
+
+
 int main(int argc, char * argv[]) {
 
-    
+      
     Linked* cache[CACHE_SIZE]; //creating the cache
     for (int i = 0; i < CACHE_SIZE; i++) {
         cache[i] = NULL;
     }
 
-    int next_id = 1;
+    int next_id = 0;
     int number_of_files = 0;
-
-    
+    char msg[520];
+   
     printf("Server started!\n");
 
-    int fd_file = open(storage_path, O_CREAT | O_RDWR, 0600); // open the file to store the documents ezz
-    if (fd_file == -1) {
+    int fd_file_write = open(storage_path, O_CREAT | O_APPEND | O_RDWR, 0600);
+    if (fd_file_write == -1) {
+        perror("Error opening storage file to write");
+        return 1;
+    } 
+
+    int fd_file_read = open(storage_path, O_RDWR, 0600); // open the file to store the documents ezz
+    if (fd_file_read == -1) {
         perror("Error opening storage file");
         return 1;
     }
@@ -24,20 +32,21 @@ int main(int argc, char * argv[]) {
     indexed_file file;
 
     ssize_t bytes_read;
-    while ((bytes_read = read(fd_file, &file, sizeof(file))) > 0) { // checking the number of files and the next id
+    while ((bytes_read = read(fd_file_read, &file, sizeof(file))) > 0) { // checking the number of files and the next id
         if (bytes_read == -1) {
             perror("Error reading from storage file");
-            close(fd_file);
+            close(fd_file_read);
             return 1;
         }
+        
         number_of_files++;
-        if (file.id >= next_id) {
+        if (file.active && file.id >= next_id) {
             next_id = file.id + 1;
         }
     }
     
     
-    lseek(fd_file, 0, SEEK_SET); // going back to the start of the file :)
+    lseek(fd_file_read, 0, SEEK_SET); // going back to the start of the file :)
 
 
     if ((mkfifo(PIPE_TO_SERVER,0600))==-1) //pipe to server
@@ -54,43 +63,18 @@ int main(int argc, char * argv[]) {
     FileInfo fileinfo;
 
 
-    open("pipe_to_server",O_WRONLY); // this is to keep the pipe open (the server will not be writting in it) (check guide 5)
+    open(PIPE_TO_SERVER,O_WRONLY); // this is to keep the pipe open (the server will not be writting in it) (check guide 5)
 
+    int res;
     int server_open = 1;
-    //while ( server_open && ((read(fd_to_server,&fileinfo,sizeof(FileInfo))) >0) ) {
-    while ( server_open ) {
-        ssize_t bytes = read(fd_to_server,&fileinfo,sizeof(FileInfo)); 
-      //^^^^^^ im using ssize_t type because read returns size_t by defalt so i use size_t because if i use int itll convert it to an int 
-        /*
-        so read() returns the number of bytes read.
-        so it can be:
-        --> it can be 0 (meaning EOF — the other end closed)
-        --> it can be > 0 (number of bytes read successfully)
-        --> it can be -1 (meaning an error happened)
-        also i cant use size_t because it only has positive values or 0, and i need to check if its -1
-        in other words:
-            size_t --> used when size cannot be negative
-            ssize_t --> used when you need to represent either positive size or a negative value 
-        */
+    while ( server_open && (res = read(fd_to_server,&fileinfo,sizeof(FileInfo))) > 0) {
         
-        //this loop keeps the server open as long as the server_open!=0
-        if (bytes == 0) {
-            // no more writers (clients), so re-open the fifo
-            close(fd_to_server);
-            fd_to_server = open(PIPE_TO_SERVER, O_RDONLY);
-            if (fd_to_server == -1) {
-                perror("Error reopening server FIFO");
-                break;
-            }
-            continue; // try reading again
-        } else if (bytes == -1) {
-            perror("Error reading from server FIFO");
-            break;
-        }
-
 
         char pipe_name[20]; 
         
+        printf("Command received: %d\n", fileinfo.id);
+        printf("Commamd %s\n",fileinfo.cmd);
+
         sprintf(pipe_name, "fifo_client:%d", fileinfo.id);
         
         int fd_to_client = open(pipe_name, O_WRONLY);// the pipe of a specific client
@@ -103,6 +87,9 @@ int main(int argc, char * argv[]) {
             printf("Indexing document: %s\n", fileinfo.title);
             
             Linked* new_file = malloc(sizeof(Linked));  
+            indexed_file file_struct;
+
+            number_of_files++;
 
             new_file->file.id = next_id;
             strcpy(new_file->file.title, fileinfo.title);
@@ -110,180 +97,344 @@ int main(int argc, char * argv[]) {
             new_file->file.year = fileinfo.year;
             strcpy(new_file->file.path, fileinfo.path);
 
-            //zeeeeeee code 
             new_file->next = cache[hash(next_id)]; // hash function to get the index in the cache
             cache[hash(next_id)] = new_file; // adding the new file to the cache :DD
 
-            //////
-            /*
+            //filling the struct to put on the storage
+            file_struct.active = 1;
+            file_struct.id = next_id;
+            strcpy(file_struct.title, fileinfo.title);
+            strcpy(file_struct.author, fileinfo.author);
+            file_struct.year = fileinfo.year;
+            strcpy(file_struct.path, fileinfo.path);
             
-            fabios fanctions
 
-            */
-           ///////
+            write(fd_file_write,&file_struct,sizeof(indexed_file));
 
 
-            char msg[] = "Document indexed successfully";
-            //example:: 10
-            int ex=10;
+            sprintf(msg,"%d\n",next_id);
+
+            next_id++;
+
+            
             write(fd_to_client, msg, sizeof(msg));
-            write(fd_to_client,&ex,sizeof(int));
-            printf("\n");
+
             close(fd_to_client);
 
+        } 
+        
+        else if (fileinfo.cmd[1] == 'c') {
 
-
-        } else if (fileinfo.cmd[1] == 'c') {
-
-            printf("Consulting document with ID: %d\n", fileinfo.id);
+            printf("-C Consulting document with ID: %d\n", fileinfo.index);
             
-            Linked* curr = cache[hash(fileinfo.id)];
+            Linked* curr = cache[hash(fileinfo.index)];
             while (curr != NULL) {                  // traversing the cache on the hash index !!
-
-                if (curr->file.id == fileinfo.id) {
+                
+                if (curr->file.id == fileinfo.index) {
                     
-                    char msg[256];
-
-                    sprintf(msg,"Title: %s\nAuthors: %s\nYear: %d\nPath: %s", curr->file.title, curr->file.author, curr->file.year, curr->file.path);
-                    
-                    write(fd_to_client, msg, sizeof(msg));
-                    printf("Document with ID %d found in cache.\n", fileinfo.id);
-
-                    break;
+                    sprintf(msg,"Title: %s\nAuthors: %s\nYear: %d\nPath: %s\n", curr->file.title, curr->file.author, curr->file.year, curr->file.path);
+                    break;  
                 }
                 curr = curr->next;
+                
             }
 
-            if (curr == NULL) {
-                printf("Document with ID %d not found in cache.\n", fileinfo.id);
+
+            if (curr == NULL) { // didnt find it in the cache so its goint thru the storage.
+                
+                printf("Document with ID %d not found in cache.\n", fileinfo.index);
                 printf("Searching in storage...\n");
-                lseek(fd_file, 0, SEEK_SET); // going back to the start of the file
+                lseek(fd_file_read, 0, SEEK_SET); // going back to the start of the file
+                
+                indexed_file file_struct;
+
+                while((res = read(fd_file_read,&file_struct,sizeof(indexed_file))) > 0) {
+                    
+                    if(file_struct.active && file_struct.id == fileinfo.index) {
+                        break;
+                    }
+                    
+                }
+
+                if (res == 0) {
+                    sprintf(msg,"didnt find nothing...\n");
+                }
+
+                else {
+                    sprintf(msg,"Title: %s\nAuthors: %s\nYear: %d\nPath: %s\n", file_struct.title ,file_struct.author, file_struct.year, file_struct.path);
+                    
+                    Linked* new_file = malloc(sizeof(Linked));  
+                    
+                    new_file->file.id = file_struct.id;
+                    strcpy(new_file->file.title, file_struct.title);
+                    strcpy(new_file->file.author, file_struct.author);
+                    new_file->file.year = file_struct.year;
+                    strcpy(new_file->file.path, file_struct.path);
+
+                    new_file->next = cache[hash(file_struct.id)]; // hash function to get the index in the cache
+                    cache[hash(file_struct.id)] = new_file; // adding the new file to the cache :DD
+
+                }
             }
-            close(fd_to_client);
+            
+                    
+                    write(fd_to_client, msg, sizeof(msg));
+                    close(fd_to_client);
 
 
         } 
         
         else if (fileinfo.cmd[1] == 'd') {
 
-            printf("Removing document with ID: %d\n", fileinfo.id);
-            // Here we would call the function to remove the document
-            // remove_document(fileinfo.id);
+            printf("Removing document with ID: %d\n", fileinfo.index);
+            
 
-            Linked* curr = cache[hash(fileinfo.id)];
-            Linked* prev = cache[hash(fileinfo.id)];
+            Linked* curr = cache[hash(fileinfo.index)];
+            Linked* prev = cache[hash(fileinfo.index)];
 
             if (curr == NULL) {
-                printf("Document with ID %d not found in cache.\n", fileinfo.id);
+                printf("line have nothing!\n");
             }
 
-            else if (curr->file.id == fileinfo.id) {
-                cache[hash(fileinfo.id)] = curr->next; // removing the first element
+            else if (curr->file.id == fileinfo.index) {
+                cache[hash(fileinfo.index)] = curr->next; // removing the first element
                 free(curr);
-                printf("Document with ID %d removed from cache.\n", fileinfo.id);
+                printf("Document with ID %d removed from cache.\n", fileinfo.index);
+                
             } 
             else {
                 prev = curr; // setting the previous element to the first oneeee
                 curr = curr->next; // moving to the next element
 
                 while (curr != NULL) {                  // traversing the cache on the hash index !!
-                    if (curr->file.id == fileinfo.id) {
+                    if (curr->file.id == fileinfo.index) {
                         prev->next = curr->next; // removing the element
                         free(curr);
-                        printf("Document with ID %d removed from cache.\n", fileinfo.id);
+                        printf("Document with ID %d removed from cache.\n", fileinfo.index);
+                        
                         break;
                     }
                     prev = curr;
                     curr = curr->next;
                 }
-
-                if (curr == NULL) {
-                    printf("Document with ID %d not found in cache.\n", fileinfo.id);
-                }
-
             }
-            close(fd_to_client);
 
+            if (curr == NULL) {
+                printf("Document with ID %d not found in cache.\n", fileinfo.index);
+            }
 
-            // Here we would call the function to remove the document from the storage file
-            // remove_document_from_storage(fileinfo.id);     
-        }
+            printf("Searching in the storage...");
 
-        else if (fileinfo.cmd[1] == 'l') { // ./dclient -l [n] [keyword]
+            lseek(fd_file_read, 0, SEEK_SET); // going back to the start of the file
+                
+            indexed_file file_struct;
 
-            
-
-            printf("Searching for keyword in document with ID: %d\n", fileinfo.id);
-            // Here we would call the function to search for a keyword in the document
-            // search_keyword_in_document(fileinfo.id, fileinfo.keyword);
-
-            Linked* curr = cache[hash(fileinfo.id)];
-            while (curr != NULL) {                  // traversing the cache on the hash index !!
-                if (curr->file.id == fileinfo.id) {
-                    printf("Document with ID %d found in cache.\n", fileinfo.id);
+            while((res = read(fd_file_read,&file_struct,sizeof(indexed_file))) > 0) {
+                    
+                if(file_struct.active && file_struct.id == fileinfo.index) {
                     break;
                 }
-                curr = curr->next;
+                    
             }
-            if (curr == NULL) {
-                printf("Document with ID %d not found in cache.\n", fileinfo.id);
-                printf("Searching in storage...\n");
-                lseek(fd_file, 0, SEEK_SET); // going back to the start of the file
+
+            if (res == 0) {
+                printf("nothing on storage too");
+                sprintf(msg,"didnt find nothing on the storage and cache\n");
+
             }
-            close(fd_to_client);
-
-                //after i find in the storage i want to add it to the cache
-                // and then i want to search for the keyword in the document
-
-            // Here we would call the function to search for a keyword in the document
-            // search_keyword_in_document(fileinfo.id, fileinfo.keyword);
-
-        } 
-        ////======================== fix ====================================================
-        else if (fileinfo.cmd[1] == 's') {  // this function its tricky because we have to search in the cache and in the storage
-            
-            printf("Searching for keyword: %s\n", fileinfo.word);
-            
-            if (fileinfo.cmd[2] == '1') {
-
-                printf("Searching with processes...\n");
-                // Here we would call the function to search for a keyword with processes
-                // search_keyword_with_processes(fileinfo.keyword, fileinfo.id);
+            else {
+                number_of_files--;
+                file_struct.active = 0;
+                lseek(fd_file_read,-sizeof(indexed_file),SEEK_CUR); //going back one space to rewrite the struct :D
+                write(fd_file_read,&file_struct,sizeof(indexed_file)); //Rewriting the struct!!!
+                sprintf(msg,"document found in storage\n");
                 
+                }
+            
+
+            write(fd_to_client, msg, sizeof(msg));
+            close(fd_to_client); 
+        }
+
+
+//================================================================================================================================================================
+//================================================================================================================================================================
+
+
+        // else if (fileinfo.cmd[1] == 'l') { // ./dclient -l [n] [keyword]
+
+        //     printf("Searching for keyword in document with ID: %d\n", fileinfo.id);
+        //     // Here we would call the function to search for a keyword in the document
+        //     // search_keyword_in_document(fileinfo.id, fileinfo.keyword);
+
+        //     Linked* curr = cache[hash(fileinfo.id)];
+        //     while (curr != NULL) {                  // traversing the cache on the hash index !!
+        //         if (curr->file.id == fileinfo.id) {
+        //             printf("Document with ID %d found in cache.\n", fileinfo.id);
+        //             break;
+        //         }
+        //         curr = curr->next;
+        //     }
+        //     if (curr == NULL) {
+        //         printf("Document with ID %d not found in cache.\n", fileinfo.id);
+        //         printf("Searching in storage...\n");
+        //         lseek(fd_file_read, 0, SEEK_SET); // going back to the start of the file
+        //     }
+        //         //after i find in the storage i want to add it to the cache
+        //         // and then i want to search for the keyword in the document
+
+        //     // Here we would call the function to search for a keyword in the document
+        //     // search_keyword_in_document(fileinfo.id, fileinfo.keyword);
+
+        // } 
+        
+        else if (fileinfo.cmd[1] == 'l') { 
+            printf("Searching for lines containing keyword '%s' in document with ID: %d\n", fileinfo.word, fileinfo.index);
+            
+            char result_buffer[520] = {0};
+            
+            // redirect stdout temporarily to capture the search results
+            int orig_stdout = dup(STDOUT_FILENO);
+            int pipefd[2];
+            pipe(pipefd);
+            dup2(pipefd[1], STDOUT_FILENO);
+            
+            search_keyword_in_document(fileinfo.index, fileinfo.word, cache); // ID "the word" cache 
+            
+            // restore stdout
+            fflush(stdout);
+            close(pipefd[1]);
+            dup2(orig_stdout, STDOUT_FILENO);
+            close(orig_stdout);
+            
+            int bytes_read = read(pipefd[0], result_buffer, sizeof(result_buffer) - 1);
+            if (bytes_read > 0) {
+                result_buffer[bytes_read] = '\0';
+            }
+            close(pipefd[0]);
+            
+            char *count_line = strstr(result_buffer, "Total number of lines containing the keyword:");
+            if (count_line) {
+                int matched_lines = 0;
+                sscanf(count_line, "Total number of lines containing the keyword: %d", &matched_lines);
+                sprintf(msg, "%d", matched_lines);
             } else {
-                
-                printf("Searching without processes...\n");
-                // Here we would call the function to search for a keyword without processes
-                // search_keyword_without_processes(fileinfo.keyword);
+                sprintf(msg, "0");
             }
+            
+            write(fd_to_client, msg, sizeof(msg));
             close(fd_to_client);
+        }
 
 
 
-        } else if (fileinfo.cmd[1] == 'f') {
+        else if (fileinfo.cmd[1] == 's') {
+            printf("Searching for keyword: \"%s\"\n", fileinfo.word);
+            
+            char result_buffer[520] = {0};
+            
+            int orig_stdout = dup(STDOUT_FILENO);
+            int pipefd[2];
+            pipe(pipefd);
+            dup2(pipefd[1], STDOUT_FILENO);
+            
+            if (fileinfo.processes > 1) {
+                printf("Searching for word [%s] with %d processes...\n", fileinfo.word, fileinfo.processes);
+                search_keyword_with_processes(fileinfo.word, cache ,fileinfo.processes);
+            } else {
+                printf("Searching for word [%s] without processes...\n", fileinfo.word);
+                search_keyword_without_processes(fileinfo.word, cache);
+            }
+            
+            fflush(stdout);
+            close(pipefd[1]);
+            dup2(orig_stdout, STDOUT_FILENO);
+            close(orig_stdout);
+            
+            int bytes_read = read(pipefd[0], result_buffer, sizeof(result_buffer) - 1);
+            if (bytes_read > 0) {
+                result_buffer[bytes_read] = '\0';
+                
+                char *result_start = strchr(result_buffer, '[');
+                if (result_start) {
+                    strcpy(msg, result_start);
+                } else {
+                    strcpy(msg, "[]"); // Empty, no documents found
+                }
+            } else {
+                strcpy(msg, "[]"); // Empty result if no output
+            }
+            close(pipefd[0]);
+            
+            write(fd_to_client, msg, sizeof(msg));
+            close(fd_to_client);
+        }
+
+
+
+
+
+        else if (fileinfo.cmd[1] == 'f') {
 
             printf("Shutting down server...\n");
             server_open = 0;
-            //save before killing 
 
-            // Here we have to rewrite the storage file with the new data
             
+            indexed_file file_struct;
+
+            
+            lseek(fd_file_read, 0, SEEK_SET);
+            lseek(fd_file_write, 0, SEEK_SET);
+
+            int fd_new = open("temp",O_CREAT | O_TRUNC | O_WRONLY, 0600);
+
+            while ((res = read(fd_file_read, &file_struct, sizeof(indexed_file))) > 0) {
+                if (res == -1) {
+                    perror("Error reading from storage file");
+                    close(fd_file_read);
+                    close(fd_file_write); 
+                    return 1;
+                }
+
+                if (file_struct.active) {
+                    // Write the active file to the new file
+                    if (write(fd_new, &file_struct, sizeof(indexed_file)) == -1) {
+                        perror("Error writing to new storage file");
+                        close(fd_new);
+                        close(fd_file_read);
+                        close(fd_file_write); 
+                        return 1;
+                    }
+                    
+                }
+            }
+
+        
+            ftruncate(fd_file_write, 0); //
+        
+            // cleaning the cache
+            for (int i = 0; i < CACHE_SIZE; i++) {
+                freeL(cache[i]);
+            }
+            
+            rename("temp", storage_path); //closing everything dear god 
+            close(fd_new);
+            close(fd_file_read);
+            close(fd_file_write);
+            unlink(PIPE_TO_SERVER); 
+            close(fd_to_server); 
+            close(fd_file_read); 
+            close(fd_file_write); 
+            printf("Server shut down successfully.\n");
+            return 0;
+
         }
-
-            
-
-            
-         
-         
-    
-    
-
-
-
-    
     }
-
-    //save part will be here
-
+    close(fd_file_write);
+    close(fd_file_read);
+    unlink(PIPE_TO_SERVER);
+    
     return 0;
 }
+
+
