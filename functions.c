@@ -101,6 +101,157 @@ void remove_document_metadata(int key) {
     printf("Error: Document with ID %d not found.\n", key);
 }
 
+/////// -l
+
+
+int grep_wc(char *word, char *path, char *msg) { // this is basically those exercices with the dups and the pipes 
+
+    int pip1[2];
+            int pip2[2];
+
+            if (pipe(pip1) == -1) {
+                perror("pipe failed..");
+                exit(1);
+            }
+            if (pipe(pip2) == -1) {
+                perror("pipe failed..");
+                exit(1);
+            }
+
+
+
+            if(fork()==0) {
+
+                close(pip1[0]);
+                dup2(pip1[1],1);  // i think thats the order the professor likes it idk at this point
+                close(pip1[1]);
+
+                close(pip2[0]);
+                close(pip2[1]);
+
+                char *args[] = {"grep",  word, path, NULL};
+                execvp(args[0], args);
+
+                perror("execvp failed");
+                exit(1);
+                
+            }
+
+            pid_t pid2 = fork();
+            if (pid2 == 0) {
+                close(pip1[1]);
+                close(pip2[0]);
+                dup2(pip1[0],0);
+                close(pip1[0]);
+
+                dup2(pip2[1],1);
+                close(pip2[1]);
+
+                char *args[] = {"wc", "-l", NULL};
+                execvp(args[0], args);
+
+                perror("execvp failed");
+                exit(1);
+            }
+
+            close(pip1[1]);
+            close(pip2[1]);
+            close(pip1[0]);
+            
+            char buffer[128];
+            ssize_t bytes_read = read(pip2[0], buffer, sizeof(buffer) - 1);
+            if (bytes_read <= 0) {
+                perror("read failed");
+                close(pip2[0]);
+                wait(NULL);
+                wait(NULL);
+                return -1;
+            }
+
+            buffer[bytes_read] = '\0';
+
+            int count = 0;
+            sscanf(buffer, "%d", &count);
+
+            
+            close(pip2[0]);
+
+            wait(NULL);
+            wait(NULL);
+
+            sprintf(msg,"Found %s", buffer); // the %s already has the '\n' cuz of the wc x)
+
+            return count;
+
+}
+
+
+
+
+int search_keyword(Linked* cache[CACHE_SIZE], char *word, int index, int fd_file_read, char *msg) {
+
+
+    int count = -1;
+            
+    Linked* curr = cache[hash(index)];
+        while (curr != NULL) {                  // traversing the cache on the hash index !!
+                
+        if (curr->file.id == index) {
+            printf("Found in cache\n");
+            count = grep_wc(word, curr->file.path, msg);
+            break;
+
+        }
+        
+        curr = curr->next;          
+    }
+
+    if (curr == NULL) { // didnt find it in the cache so its goint thru the storage.
+        
+        int res;
+        
+        printf("Document with ID %d not found in cache.\n", index);
+        printf("Searching in storage...\n");
+        lseek(fd_file_read, 0, SEEK_SET); // going back to the start of the file
+                
+        indexed_file file_struct;
+
+        while((res = read(fd_file_read,&file_struct,sizeof(indexed_file))) > 0) {
+                    
+            if(file_struct.active && file_struct.id == index) {
+                
+                count = grep_wc(word, file_struct.path, msg);
+            }
+                    
+        }
+
+        if (res == 0) {
+            sprintf(msg,"didnt find nothing...\n");
+        }
+
+        else {
+            
+            count = grep_wc(word, file_struct.path, msg);
+    
+            Linked* new_file = malloc(sizeof(Linked));  
+                    
+            new_file->file.id = file_struct.id;
+            strcpy(new_file->file.title, file_struct.title);
+            strcpy(new_file->file.author, file_struct.author);
+            new_file->file.year = file_struct.year;
+            strcpy(new_file->file.path, file_struct.path);
+
+            new_file->next = cache[hash(file_struct.id)]; // hash function to get the index in the cache
+            cache[hash(file_struct.id)] = new_file; // adding the new file to the cache :DD
+
+        }
+    }
+    
+    return count;
+}
+
+//
+
 // Command -l
 // In general, I think this function is good. We only have to:
 // 1. Make it more friendly ( use more functions that are knows for us, instead of some "weird" functions )
@@ -357,4 +508,8 @@ void freeL(Linked *link) {
         atual = pre;
     }
 
+}
+
+int hash(int k) {
+    return k % CACHE_SIZE;
 }

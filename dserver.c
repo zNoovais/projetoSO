@@ -69,7 +69,6 @@ int main(int argc, char * argv[]) {
     int server_open = 1;
     while ( server_open && (res = read(fd_to_server,&fileinfo,sizeof(FileInfo))) > 0) {
         
-
         char pipe_name[20]; 
         
         printf("Command received: %d\n", fileinfo.id);
@@ -258,31 +257,11 @@ int main(int argc, char * argv[]) {
 
         else if (fileinfo.cmd[1] == 'l') { // ./dclient -l [n] [keyword]
 
-            
-
             printf("Searching for keyword in document with ID: %d\n", fileinfo.id);
-            // Here we would call the function to search for a keyword in the document
-            // search_keyword_in_document(fileinfo.id, fileinfo.keyword);
-
-            Linked* curr = cache[hash(fileinfo.id)];
-            while (curr != NULL) {                  // traversing the cache on the hash index !!
-                if (curr->file.id == fileinfo.id) {
-                    printf("Document with ID %d found in cache.\n", fileinfo.id);
-                    break;
-                }
-                curr = curr->next;
-            }
-            if (curr == NULL) {
-                printf("Document with ID %d not found in cache.\n", fileinfo.id);
-                printf("Searching in storage...\n");
-                lseek(fd_file_read, 0, SEEK_SET); // going back to the start of the file
-            }
-                //after i find in the storage i want to add it to the cache
-                // and then i want to search for the keyword in the document
-
-            // Here we would call the function to search for a keyword in the document
-            // search_keyword_in_document(fileinfo.id, fileinfo.keyword);
-
+            printf("Keyword: %s\n", fileinfo.word);
+            search_keyword(cache, fileinfo.word, fileinfo.index, fd_file_read, msg);
+            write(fd_to_client, msg, sizeof(msg));
+            close(fd_to_client);
         } 
         
         else if (fileinfo.cmd[1] == 's') {  // this function its tricky because we have to search in the cache and in the storage

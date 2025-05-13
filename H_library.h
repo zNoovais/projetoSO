@@ -25,7 +25,7 @@ typedef struct FileInfo { //this should not exceed 512bytes
     int id; // this will be the pid so that we can find the client fifo (check guide 5 is smth like that) aka pipe: fd_from_server
     int processes; //the number of children (-s)
 
-    char cmd[3]; //op
+    char cmd[8]; //op
     
     char title[100]; // max 200bytes the author and the title together
     char author[100];
@@ -55,3 +55,6 @@ int hash(int key);
 void freeL(Linked *link);
 void search_keyword_without_processes(const char *word);
 void search_keyword_with_processes (const char *word, int n);
+
+int search_keyword(Linked* cache[CACHE_SIZE], char *word, int index, int fd_file_read, char *msg);
+int grep_wc(char *word, char *filename, char *msg);
