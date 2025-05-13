@@ -69,6 +69,8 @@ int main(int argc, char * argv[]) {
     int server_open = 1;
     while ( server_open && (res = read(fd_to_server,&fileinfo,sizeof(FileInfo))) > 0) {
         
+        printf("%s PALAABAVA\n",fileinfo.word);
+
         char pipe_name[20]; 
         
         printf("Command received: %d\n", fileinfo.id);

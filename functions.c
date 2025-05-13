@@ -107,52 +107,52 @@ void remove_document_metadata(int key) {
 int grep_wc(char *word, char *path, char *msg) { // this is basically those exercices with the dups and the pipes 
 
     int pip1[2];
-            int pip2[2];
+    int pip2[2];
 
-            if (pipe(pip1) == -1) {
-                perror("pipe failed..");
-                exit(1);
-            }
-            if (pipe(pip2) == -1) {
-                perror("pipe failed..");
-                exit(1);
-            }
+    if (pipe(pip1) == -1) {
+        perror("pipe failed..");
+        exit(1);
+    }
+    if (pipe(pip2) == -1) {
+        perror("pipe failed..");
+        exit(1);
+    }
 
 
 
-            if(fork()==0) {
+    if(fork()==0) {
 
-                close(pip1[0]);
-                dup2(pip1[1],1);  // i think thats the order the professor likes it idk at this point
-                close(pip1[1]);
+        close(pip1[0]);
+        dup2(pip1[1],1);  // i think thats the order the professor likes it idk at this point
+        close(pip1[1]);
 
-                close(pip2[0]);
-                close(pip2[1]);
+        close(pip2[0]);
+        close(pip2[1]);
 
-                char *args[] = {"grep",  word, path, NULL};
-                execvp(args[0], args);
+        char *args[] = {"grep",  word, path, NULL};
+        execvp(args[0], args);
 
-                perror("execvp failed");
-                exit(1);
+        perror("execvp failed");
+        exit(1);
                 
-            }
+    }
 
-            pid_t pid2 = fork();
-            if (pid2 == 0) {
-                close(pip1[1]);
-                close(pip2[0]);
-                dup2(pip1[0],0);
-                close(pip1[0]);
+    pid_t pid2 = fork();
+    if (pid2 == 0) {
+        close(pip1[1]);
+        close(pip2[0]);
+        dup2(pip1[0],0);
+        close(pip1[0]);
 
-                dup2(pip2[1],1);
-                close(pip2[1]);
+        dup2(pip2[1],1);
+        close(pip2[1]);
 
-                char *args[] = {"wc", "-l", NULL};
-                execvp(args[0], args);
+        char *args[] = {"wc", "-l", NULL};
+        execvp(args[0], args);
 
-                perror("execvp failed");
-                exit(1);
-            }
+        perror("execvp failed");
+        exit(1);
+        }
 
             close(pip1[1]);
             close(pip2[1]);
@@ -198,7 +198,7 @@ int search_keyword(Linked* cache[CACHE_SIZE], char *word, int index, int fd_file
                 
         if (curr->file.id == index) {
             printf("Found in cache\n");
-            count = grep_wc(word, curr->file.path, msg);
+            count = grep_wc(word, curr->file.path, msg); // when its found in the cache 
             break;
 
         }
@@ -220,7 +220,7 @@ int search_keyword(Linked* cache[CACHE_SIZE], char *word, int index, int fd_file
                     
             if(file_struct.active && file_struct.id == index) {
                 
-                count = grep_wc(word, file_struct.path, msg);
+                break;
             }
                     
         }
@@ -231,7 +231,7 @@ int search_keyword(Linked* cache[CACHE_SIZE], char *word, int index, int fd_file
 
         else {
             
-            count = grep_wc(word, file_struct.path, msg);
+            count = grep_wc(word, file_struct.path, msg); // when its found in the storage
     
             Linked* new_file = malloc(sizeof(Linked));  
                     
