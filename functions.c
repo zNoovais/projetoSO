@@ -188,8 +188,7 @@ int grep_wc(char *word, char *path, char *msg) { // this is basically those exer
 
 
 
-int search_keyword(Linked* cache[CACHE_SIZE], char *word, int index, int fd_file_read, char *msg) {
-
+int search_keyword(Linked* cache[CACHE_LINES], char *word, int index, int fd_file_read, char *msg, int *cache_occupation, int virtual_time) {
 
     int count = -1;
             
@@ -198,6 +197,7 @@ int search_keyword(Linked* cache[CACHE_SIZE], char *word, int index, int fd_file
                 
         if (curr->file.id == index) {
             printf("Found in cache\n");
+            curr->last_accessed = virtual_time; // last time used
             count = grep_wc(word, curr->file.path, msg); // when its found in the cache 
             break;
 
@@ -234,7 +234,9 @@ int search_keyword(Linked* cache[CACHE_SIZE], char *word, int index, int fd_file
             count = grep_wc(word, file_struct.path, msg); // when its found in the storage
     
             Linked* new_file = malloc(sizeof(Linked));  
-                    
+            
+            (*cache_occupation)++;
+            new_file->last_accessed = virtual_time; // last time used
             new_file->file.id = file_struct.id;
             strcpy(new_file->file.title, file_struct.title);
             strcpy(new_file->file.author, file_struct.author);
@@ -250,50 +252,126 @@ int search_keyword(Linked* cache[CACHE_SIZE], char *word, int index, int fd_file
     return count;
 }
 
-//
-
-// Command -l
-// In general, I think this function is good. We only have to:
-// 1. Make it more friendly ( use more functions that are knows for us, instead of some "weird" functions )
-// 2. This function will work in the server, but we have to send the return value to the client, and then the 
-// client have to print it.
-
-// samir's note: im going to work on -l 
-
-// int count_lines_with_keyword(int key, const char *keyword) {
-//     Document *curr = doc_list;
-//     while (curr != NULL) {
-//         if (curr->id == key) {
-//             int fd = open(curr->path, O_RDONLY);
-//             if (fd < 0) {
-//                 perror("open");
-//                 return -1;
-//             }
-
-//             char buffer[4096];
-//             ssize_t bytes_read;
-//             int lines_with_keyword = 0;
-//             //char *line_start = buffer;
-//             size_t total = 0;
-
-//             while ((bytes_read = read(fd, buffer + total, sizeof(buffer) - total - 1)) > 0) {
-//                 buffer[total + bytes_read] = '\0';
-//                 char *line = strtok(buffer, "\n");
-//                 while (line != NULL) {
-//                     if (strstr(line, keyword) != NULL) {
-//                         lines_with_keyword++;
-//                     }
-//                     line = strtok(NULL, "\n");
-//                 }
-//                 total = 0;
-//             }
-//             close(fd);
-//             return lines_with_keyword;
-//         }
-//         curr = curr->next;
+// int file_contains_word(const char *filepath, const char *keyword) { // samir's function  to search if a path contains a word I really liked it
+//     int pipefd[2];
+//     if (pipe(pipefd) == -1) {
+//         perror("pipe");
+//         return 0;
 //     }
-//     return -1;
+
+//     pid_t pid = fork();
+//     if (pid == -1) {
+//         perror("fork");
+//         close(pipefd[0]);
+//         close(pipefd[1]);
+//         return 0;
+//     }
+
+//     if (pid == 0) {  // child process
+//         close(pipefd[0]);
+        
+//         // redirect stdout to pipe
+//         dup2(pipefd[1], STDOUT_FILENO);
+//         close(pipefd[1]);
+        
+//         // Execute grep to search for keyword
+//         execlp("grep", "grep", "-q", keyword, filepath, NULL);
+        
+//         // if execlp fails
+//         perror("execlp");
+//         exit(1);
+//     } 
+//     else {  // parent process
+//         close(pipefd[1]);
+        
+//         int status;
+//         waitpid(pid, &status, 0);
+        
+//         // check if grep found the keyword (exit status 0 means found)
+//         if (WIFEXITED(status) && WEXITSTATUS(status) == 0) {
+//             close(pipefd[0]);
+//             return 1;  // found
+//         } else {
+//             close(pipefd[0]);
+//             return 0;  // not found
+//         }
+//     }
 // }
+
+int search_contains_word(char *keyword, int number_of_processes, int number_of_files, int fd_file_read, int fd_file_write, int deleted)   {
+
+    int res;
+    indexed_file file_struct;
+
+    //this part here just make sure we have no gaps
+    
+    lseek(fd_file_read, 0, SEEK_SET);
+    lseek(fd_file_write, 0, SEEK_SET);
+
+    if (deleted != 0) {
+
+        int fd_new = open("temp",O_CREAT | O_TRUNC | O_WRONLY, 0600);
+
+        while ((res = read(fd_file_read, &file_struct, sizeof(indexed_file))) > 0) {
+            if (res == -1) {
+                perror("Error reading from storage file");
+                close(fd_file_read);
+                close(fd_file_write); 
+                return 1;
+            }
+
+            if (file_struct.active) {
+            // Write the active file to the new file
+                if (write(fd_new, &file_struct, sizeof(indexed_file)) == -1) {
+                    perror("Error writing to new storage file");
+                    close(fd_new);
+                    close(fd_file_read);
+                    close(fd_file_write); 
+                    return 1;
+                }
+                        
+            }
+        }
+
+        deleted = 0;
+
+    }
+
+    lseek(fd_file_read, 0, SEEK_SET);
+    lseek(fd_file_write, 0, SEEK_SET);
+
+    int search_amount = number_of_files / number_of_processes;
+    
+    return 0;
+
+}
+
+
+
+
+
+
+int file_contains_word(char *filepath, char *keyword) { // 1 or 0
+    pid_t pid = fork();
+    if (pid == -1) {
+        perror("fork  errorr");
+        return 0;
+    }
+    int status;
+
+    if (pid == 0) { 
+        execlp("grep", "grep", "-q", keyword, filepath, NULL);
+        perror("execlp");
+        exit(1);
+    } else {  
+        
+        waitpid(pid, &status, 0); // im getting the status by using this 
+
+
+        return (WIFEXITED(status) && WEXITSTATUS(status) == 0); // the left one is if the exit went good the other one is the exit status
+    }
+}
+
 
 
 //================================================================================================================================================================
@@ -511,5 +589,5 @@ void freeL(Linked *link) {
 }
 
 int hash(int k) {
-    return k % CACHE_SIZE;
+    return k % CACHE_LINES;
 }

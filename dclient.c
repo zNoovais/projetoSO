@@ -216,7 +216,7 @@ int main(int argc, char* argv[]) {
         }
     
         buffer[res] = '\0';  // Ensure null termination
-        printf("%s", buffer);
+        printf("%s", buffer);  // CHANGE THIS TO WRITE INSTEAD OF PRINTF
     }
     
    

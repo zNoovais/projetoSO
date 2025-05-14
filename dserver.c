@@ -5,12 +5,15 @@
 
 int main(int argc, char * argv[]) {
 
-      
-    Linked* cache[CACHE_SIZE]; //creating the cache
-    for (int i = 0; i < CACHE_SIZE; i++) {
+
+    Linked* cache[CACHE_LINES]; //creating the cache
+    for (int i = 0; i < CACHE_LINES; i++) {
         cache[i] = NULL;
     }
 
+    int deleted = 0;
+    int cache_occupation = 0;
+    int virtual_time = 0;
     int next_id = 0;
     int number_of_files = 0;
     char msg[520];
@@ -32,7 +35,7 @@ int main(int argc, char * argv[]) {
     indexed_file file;
 
     ssize_t bytes_read;
-    while ((bytes_read = read(fd_file_read, &file, sizeof(file))) > 0) { // checking the number of files and the next id
+    while ((bytes_read = read(fd_file_read, &file, sizeof(file))) > 0) { // checking the number of files and the next id // this is one calculation in the storage
         if (bytes_read == -1) {
             perror("Error reading from storage file");
             close(fd_file_read);
@@ -68,9 +71,8 @@ int main(int argc, char * argv[]) {
     int res;
     int server_open = 1;
     while ( server_open && (res = read(fd_to_server,&fileinfo,sizeof(FileInfo))) > 0) {
+       
         
-        printf("%s PALAABAVA\n",fileinfo.word);
-
         char pipe_name[20]; 
         
         printf("Command received: %d\n", fileinfo.id);
@@ -91,12 +93,18 @@ int main(int argc, char * argv[]) {
             indexed_file file_struct;
 
             number_of_files++;
+            cache_occupation++;
+            virtual_time++;
+            
+            
 
             new_file->file.id = next_id;
             strcpy(new_file->file.title, fileinfo.title);
             strcpy(new_file->file.author, fileinfo.author);
             new_file->file.year = fileinfo.year;
             strcpy(new_file->file.path, fileinfo.path);
+
+            new_file->last_accessed = virtual_time; // last time used
 
             new_file->next = cache[hash(next_id)]; // hash function to get the index in the cache
             cache[hash(next_id)] = new_file; // adding the new file to the cache :DD
@@ -127,12 +135,13 @@ int main(int argc, char * argv[]) {
         else if (fileinfo.cmd[1] == 'c') {
 
             printf("-C Consulting document with ID: %d\n", fileinfo.index);
+            virtual_time++;
             
             Linked* curr = cache[hash(fileinfo.index)];
             while (curr != NULL) {                  // traversing the cache on the hash index !!
                 
                 if (curr->file.id == fileinfo.index) {
-                    
+                    curr->last_accessed = virtual_time; // last time used
                     sprintf(msg,"Title: %s\nAuthors: %s\nYear: %d\nPath: %s\n", curr->file.title, curr->file.author, curr->file.year, curr->file.path);
                     break;  
                 }
@@ -152,6 +161,7 @@ int main(int argc, char * argv[]) {
                 while((res = read(fd_file_read,&file_struct,sizeof(indexed_file))) > 0) {
                     
                     if(file_struct.active && file_struct.id == fileinfo.index) {
+
                         break;
                     }
                     
@@ -166,6 +176,8 @@ int main(int argc, char * argv[]) {
                     
                     Linked* new_file = malloc(sizeof(Linked));  
                     
+                    cache_occupation++;
+                    new_file->last_accessed = virtual_time;
                     new_file->file.id = file_struct.id;
                     strcpy(new_file->file.title, file_struct.title);
                     strcpy(new_file->file.author, file_struct.author);
@@ -188,7 +200,7 @@ int main(int argc, char * argv[]) {
         else if (fileinfo.cmd[1] == 'd') {
 
             printf("Removing document with ID: %d\n", fileinfo.index);
-            
+            virtual_time++;
 
             Linked* curr = cache[hash(fileinfo.index)];
             Linked* prev = cache[hash(fileinfo.index)];
@@ -212,7 +224,7 @@ int main(int argc, char * argv[]) {
                         prev->next = curr->next; // removing the element
                         free(curr);
                         printf("Document with ID %d removed from cache.\n", fileinfo.index);
-                        
+                        cache_occupation--;
                         break;
                     }
                     prev = curr;
@@ -253,15 +265,16 @@ int main(int argc, char * argv[]) {
                 }
             
 
-            write(fd_to_client, msg, sizeof(msg));
+            write(fd_to_client, msg, sizeof(msg)); 
             close(fd_to_client); 
         }
 
-        else if (fileinfo.cmd[1] == 'l') { // ./dclient -l [n] [keyword]
+        else if (fileinfo.cmd[1] == 'l') { // ./dclient -l [n] [keyword] 
 
-            printf("Searching for keyword in document with ID: %d\n", fileinfo.id);
-            printf("Keyword: %s\n", fileinfo.word);
-            search_keyword(cache, fileinfo.word, fileinfo.index, fd_file_read, msg);
+            virtual_time++;
+            printf("Searching for keyword in document with ID: %d\n", fileinfo.id); 
+            printf("Keyword: %s\n", fileinfo.word); 
+            search_keyword(cache, fileinfo.word, fileinfo.index, fd_file_read, msg, &cache_occupation, virtual_time);
             write(fd_to_client, msg, sizeof(msg));
             close(fd_to_client);
         } 
@@ -293,43 +306,47 @@ int main(int argc, char * argv[]) {
             
             indexed_file file_struct;
 
-            
-            lseek(fd_file_read, 0, SEEK_SET);
-            lseek(fd_file_write, 0, SEEK_SET);
+            if (deleted != 0) { // this a quick optimazation 
+                lseek(fd_file_read, 0, SEEK_SET);
+                lseek(fd_file_write, 0, SEEK_SET);
 
-            int fd_new = open("temp",O_CREAT | O_TRUNC | O_WRONLY, 0600);
+                int fd_new = open("temp",O_CREAT | O_TRUNC | O_WRONLY, 0600);
 
-            while ((res = read(fd_file_read, &file_struct, sizeof(indexed_file))) > 0) {
-                if (res == -1) {
-                    perror("Error reading from storage file");
-                    close(fd_file_read);
-                    close(fd_file_write); 
-                    return 1;
-                }
-
-                if (file_struct.active) {
-                    // Write the active file to the new file
-                    if (write(fd_new, &file_struct, sizeof(indexed_file)) == -1) {
-                        perror("Error writing to new storage file");
-                        close(fd_new);
+                while ((res = read(fd_file_read, &file_struct, sizeof(indexed_file))) > 0) {
+                    if (res == -1) {
+                        perror("Error reading from storage file");
                         close(fd_file_read);
                         close(fd_file_write); 
                         return 1;
                     }
-                    
+
+                    if (file_struct.active) {
+                        // Write the active file to the new file
+                        if (write(fd_new, &file_struct, sizeof(indexed_file)) == -1) {
+                            perror("Error writing to new storage file");
+                            close(fd_new);
+                            close(fd_file_read);
+                            close(fd_file_write); 
+                            return 1;
+                        }
+                        
+                    }
                 }
+
+                rename("temp", storage_path); //closing everything dear god 
+                
+                ftruncate(fd_file_write, 0); //
+                close(fd_new);
+            
             }
 
-        
-            ftruncate(fd_file_write, 0); //
-        
             // cleaning the cache
-            for (int i = 0; i < CACHE_SIZE; i++) {
+            for (int i = 0; i < CACHE_LINES; i++) {
                 freeL(cache[i]);
             }
             
-            rename("temp", storage_path); //closing everything dear god 
-            close(fd_new);
+            
+            
             close(fd_file_read);
             close(fd_file_write);
             unlink(PIPE_TO_SERVER); 

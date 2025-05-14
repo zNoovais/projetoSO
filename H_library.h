@@ -15,9 +15,11 @@
 // i changed ^^^^^^this fucker to PIPE_TO_SERVER so that we can understand where it going 
 #define PIPE_TO_CLIENT "fifo_client" 
 
-#define CACHE_SIZE 100
+#define CACHE_LINES 10
 
 #define storage_path "armazenamento"
+
+#define MAX_CACHE_SIZE 100 // max size of the cache
 
 //infromation abiout the books and shit
 typedef struct FileInfo { //this should not exceed 512bytes
@@ -47,6 +49,7 @@ typedef struct indexed_file {
 
 typedef struct LinkedList {
     indexed_file file;
+    int last_accessed; 
     struct LinkedList *next;
 } Linked;
 
@@ -56,5 +59,5 @@ void freeL(Linked *link);
 void search_keyword_without_processes(const char *word);
 void search_keyword_with_processes (const char *word, int n);
 
-int search_keyword(Linked* cache[CACHE_SIZE], char *word, int index, int fd_file_read, char *msg);
+int search_keyword(Linked* cache[CACHE_LINES], char *word, int index, int fd_file_read, char *msg, int *cache_occupation, int virtual_time);
 int grep_wc(char *word, char *filename, char *msg);
