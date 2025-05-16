@@ -6,9 +6,11 @@
 int main(int argc, char * argv[]) {
 
 
-    Linked* cache[CACHE_LINES]; //creating the cache
+    cacheLines cache[CACHE_LINES]; //creating the cache
+
     for (int i = 0; i < CACHE_LINES; i++) {
-        cache[i] = NULL;
+        cache[i].list = NULL;
+        cache[i].occupation = 0;
     }
 
     int deleted = 0;
@@ -89,25 +91,13 @@ int main(int argc, char * argv[]) {
 
             printf("Indexing document: %s\n", fileinfo.title);
             
-            Linked* new_file = malloc(sizeof(Linked));  
+          
             indexed_file file_struct;
 
             number_of_files++;
-            cache_occupation++;
+            
             virtual_time++;
-            
-            
-
-            new_file->file.id = next_id;
-            strcpy(new_file->file.title, fileinfo.title);
-            strcpy(new_file->file.author, fileinfo.author);
-            new_file->file.year = fileinfo.year;
-            strcpy(new_file->file.path, fileinfo.path);
-
-            new_file->last_accessed = virtual_time; // last time used
-
-            new_file->next = cache[hash(next_id)]; // hash function to get the index in the cache
-            cache[hash(next_id)] = new_file; // adding the new file to the cache :DD
+                                     
 
             //filling the struct to put on the storage
             file_struct.active = 1;
@@ -137,7 +127,7 @@ int main(int argc, char * argv[]) {
             printf("-C Consulting document with ID: %d\n", fileinfo.index);
             virtual_time++;
             
-            Linked* curr = cache[hash(fileinfo.index)];
+            Linked* curr = cache[hash(fileinfo.index)].list;
             while (curr != NULL) {                  // traversing the cache on the hash index !!
                 
                 if (curr->file.id == fileinfo.index) {
@@ -166,6 +156,7 @@ int main(int argc, char * argv[]) {
                     }
                     
                 }
+                printf("Read result: %d\n", res);
 
                 if (res == 0) {
                     sprintf(msg,"didnt find nothing...\n");
@@ -174,6 +165,9 @@ int main(int argc, char * argv[]) {
                 else {
                     sprintf(msg,"Title: %s\nAuthors: %s\nYear: %d\nPath: %s\n", file_struct.title ,file_struct.author, file_struct.year, file_struct.path);
                     
+
+                   
+
                     Linked* new_file = malloc(sizeof(Linked));  
                     
                     cache_occupation++;
@@ -184,14 +178,23 @@ int main(int argc, char * argv[]) {
                     new_file->file.year = file_struct.year;
                     strcpy(new_file->file.path, file_struct.path);
 
-                    new_file->next = cache[hash(file_struct.id)]; // hash function to get the index in the cache
-                    cache[hash(file_struct.id)] = new_file; // adding the new file to the cache :DD
+                    if (cache[hash(file_struct.id)].occupation >= MAX_LINE_SIZE) {
+                        remove_least_used(cache[hash(file_struct.id)].list, virtual_time);
+                    }
+
+                    new_file->next = cache[hash(file_struct.id)].list; // hash function to get the index in the cache
+
+                     
+
+                    cache[hash(file_struct.id)].list = new_file; // adding the new file to the cache :DD
+                    cache[hash(file_struct.id)].occupation++;
+                    
 
                 }
             }
             
                     
-                    write(fd_to_client, msg, sizeof(msg));
+                    write(fd_to_client, msg, strlen(msg));
                     close(fd_to_client);
 
 
@@ -202,17 +205,19 @@ int main(int argc, char * argv[]) {
             printf("Removing document with ID: %d\n", fileinfo.index);
             virtual_time++;
 
-            Linked* curr = cache[hash(fileinfo.index)];
-            Linked* prev = cache[hash(fileinfo.index)];
+            Linked* curr = cache[hash(fileinfo.index)].list;
+            Linked* prev = cache[hash(fileinfo.index)].list;
 
             if (curr == NULL) {
                 printf("line have nothing!\n");
             }
 
             else if (curr->file.id == fileinfo.index) {
-                cache[hash(fileinfo.index)] = curr->next; // removing the first element
+                cache[hash(fileinfo.index)].list = curr->next; // removing the first element
                 free(curr);
                 printf("Document with ID %d removed from cache.\n", fileinfo.index);
+                cache[hash(fileinfo.index)].occupation--;
+                cache_occupation--;
                 
             } 
             else {
@@ -274,7 +279,7 @@ int main(int argc, char * argv[]) {
             virtual_time++;
             printf("Searching for keyword in document with ID: %d\n", fileinfo.id); 
             printf("Keyword: %s\n", fileinfo.word); 
-            search_keyword(cache, fileinfo.word, fileinfo.index, fd_file_read, msg, &cache_occupation, virtual_time);
+            search_keyword(cache, fileinfo.word, fileinfo.index, fd_file_read, msg, &cache_occupation, virtual_time); // this was a experiment to this all in a function......
             write(fd_to_client, msg, sizeof(msg));
             close(fd_to_client);
         } 
@@ -309,7 +314,7 @@ int main(int argc, char * argv[]) {
 
             if (deleted != 0) { // this a quick optimazation 
                 lseek(fd_file_read, 0, SEEK_SET);
-                lseek(fd_file_write, 0, SEEK_SET);
+                
 
                 int fd_new = open("temp",O_CREAT | O_TRUNC | O_WRONLY, 0600);
 
@@ -343,7 +348,7 @@ int main(int argc, char * argv[]) {
 
             // cleaning the cache
             for (int i = 0; i < CACHE_LINES; i++) {
-                freeL(cache[i]);
+                freeL(cache[i].list);
             }
             
             
