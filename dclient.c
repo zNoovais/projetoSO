@@ -1,16 +1,27 @@
 #include "H_library.h"
 
+// write(STDOUT_FILENO, " ", strlen(" \n"));
+
 int main(int argc, char* argv[]) {
     if (argc < 2)
     {
-        printf("Usage:\n");
-        printf("Index request: ./dclient -a [Title] [Author] [Year] [Document name] \n");
-        printf("Consult document: ./dclient -c [n]\n");
-        printf("Remove request: ./dclient -d [n]\n");
-        printf("Search number of lines of keyword: ./dclient -l [n] [keyword]\n");
-        printf("Search keyword: ./dclient -s [keyword]\n");
-        printf("Search keyword w/ processes: ./dclient -s [keyword] [number of processes]\n");
-        printf("Shutdown: ./dclient -f\n");
+        // printf("Usage:\n");
+        // printf("Index request: ./dclient -a [Title] [Author] [Year] [Document name] \n");
+        // printf("Consult document: ./dclient -c [n]\n");
+        // printf("Remove request: ./dclient -d [n]\n");
+        // printf("Search number of lines of keyword: ./dclient -l [n] [keyword]\n");
+        // printf("Search keyword: ./dclient -s [keyword]\n");
+        // printf("Search keyword w/ processes: ./dclient -s [keyword] [number of processes]\n");
+        // printf("Shutdown: ./dclient -f\n");
+
+        write(STDOUT_FILENO,"Usage:\n ", strlen("Usage:\n"));
+        write(STDOUT_FILENO,"Index request: ./dclient -a [Title] [Author] [Year] [Document name] \n ", strlen("Index request: ./dclient -a [Title] [Author] [Year] [Document name] \n"));
+        write(STDOUT_FILENO,"Consult document: ./dclient -c [n]\n", strlen("Consult document: ./dclient -c [n]\n"));
+        write(STDOUT_FILENO,"Remove request: ./dclient -d [n]\n", strlen("Remove request: ./dclient -d [n]\n"));
+        write(STDOUT_FILENO,"Search number of lines of keyword: ./dclient -l [n] [keyword]\n", strlen("Search number of lines of keyword: ./dclient -l [n] [keyword]\n"));
+        write(STDOUT_FILENO,"Search keyword: ./dclient -s [keyword]\n", strlen("Search keyword: ./dclient -s [keyword]\n"));
+        write(STDOUT_FILENO,"Search keyword w/ processes: ./dclient -s [keyword] [number of processes]\n", strlen("Search keyword w/ processes: ./dclient -s [keyword] [number of processes]\n"));
+        write(STDOUT_FILENO,"Shutdown: ./dclient -f\n", strlen("Shutdown: ./dclient -f\n"));
         return 1;
     }
 
@@ -44,7 +55,8 @@ int main(int argc, char* argv[]) {
     if (strcmp(argv[1], "-a") == 0) {
         
         if (argc != 6) {
-            printf("Usage: ./dclient -a [title] [author] [year] [path]\n");
+            // printf("Usage: ./dclient -a [title] [author] [year] [path]\n");
+            write(STDOUT_FILENO, "Usage: ./dclient -a [title] [author] [year] [path]\n", strlen("Usage: ./dclient -a [title] [author] [year] [path]\n"));
             close(fd_to_server);
             unlink(client_fifo);
             return 1;
@@ -72,7 +84,9 @@ int main(int argc, char* argv[]) {
     else if (strcmp(argv[1], "-c") == 0) {
         
         if (argc != 3) {
-            printf("Usage: ./dclient -c [index_of_document]\n");
+            // printf("Usage: ./dclient -c [index_of_document]\n");
+            write(STDOUT_FILENO, "Usage: ./dclient -c [index_of_document]\n", strlen("Usage: ./dclient -c [index_of_document]\n"));
+
             close(fd_to_server);
             unlink(client_fifo);
             return 1;
@@ -89,7 +103,9 @@ int main(int argc, char* argv[]) {
     else if (strcmp(argv[1], "-d") == 0) {
         
         if (argc != 3) {
-            printf("Usage: ./dclient -d [n]\n");
+            // printf("Usage: ./dclient -d [n]\n");
+            write(STDOUT_FILENO, "Usage: ./dclient -d [n]\n", strlen("Usage: ./dclient -d [n]\n"));
+
             close(fd_to_server);
             unlink(client_fifo);
             return 1;
@@ -109,7 +125,9 @@ int main(int argc, char* argv[]) {
     else if (strcmp(argv[1], "-l") == 0) {
         
         if (argc != 4) {
-            printf("Usage: ./dclient -l [index_of_document] [keyword]\n");
+            // printf("Usage: ./dclient -l [index_of_document] [keyword]\n");
+            write(STDOUT_FILENO, "Usage: ./dclient -l [index_of_document] [keyword]\n", strlen("Usage: ./dclient -l [index_of_document] [keyword]\n"));
+
             close(fd_to_server);
             unlink(client_fifo);
             return 1;
@@ -134,7 +152,10 @@ int main(int argc, char* argv[]) {
     else if (strcmp(argv[1], "-s") == 0) {
         
         if (argc < 3 || argc > 4) {
-            printf("Usage: ./dclient -s [keyword] or ./dclient -s [keyword] [number of processes]\n");
+            // printf("Usage: ./dclient -s [keyword] or ./dclient -s [keyword] [number of processes]\n");
+            write(STDOUT_FILENO, "Usage: ./dclient -s [keyword]\n", strlen("Usage: ./dclient -s [keyword]\n"));
+            write(STDOUT_FILENO,"or\n",strlen("or\n"));
+            write(STDOUT_FILENO,"       ./dclient -s [keyword] [number of processes]\n",strlen("       ./dclient -s [keyword] [number of processes]\n"));
             close(fd_to_server);
             unlink(client_fifo);
             return 1;
@@ -161,13 +182,17 @@ int main(int argc, char* argv[]) {
     else if (strcmp(argv[1], "-f") == 0) {
     
         strcpy(fileinfo.cmd, "-f");
-        printf("Server is shutting down...\n");
-        
+        // printf("Server is shutting down...\n");
+        write(STDOUT_FILENO, "Server is shutting down...\n", strlen("Server is shutting down...\n"));
+
+
     } 
     
     //if its anything else, which isnt valid
     else {
-        printf("Invalid command. Please check usage.\n");
+        // printf("Invalid command. Please check usage.\n");
+        write(STDOUT_FILENO, "Invalid command. Please check usage.\n ", strlen("Invalid command. Please check usage.\n"));
+
         close(fd_to_server);
         unlink(client_fifo);
         return 1;
@@ -216,7 +241,8 @@ int main(int argc, char* argv[]) {
         }
     
         buffer[res] = '\0';  // Ensure null termination
-        printf("%s", buffer);  // CHANGE THIS TO WRITE INSTEAD OF PRINTF
+        // printf("%s", buffer);  // CHANGE THIS TO WRITE INSTEAD OF PRINTF        ================================
+        write(STDOUT_FILENO, buffer,res);
     }
     
    

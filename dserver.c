@@ -116,7 +116,9 @@ int main(int argc, char * argv[]) {
             next_id++;
 
             
-            write(fd_to_client, msg, sizeof(msg));
+            // write(fd_to_client, msg, sizeof(msg));
+            write(fd_to_client, msg, strlen(msg));
+
 
             close(fd_to_client);
 
@@ -270,7 +272,8 @@ int main(int argc, char * argv[]) {
                 }
             
 
-            write(fd_to_client, msg, sizeof(msg)); 
+            // write(fd_to_client, msg, sizeof(msg)); 
+            write(fd_to_client, msg, strlen(msg)); 
             close(fd_to_client); 
         }
 
@@ -280,7 +283,9 @@ int main(int argc, char * argv[]) {
             printf("Searching for keyword in document with ID: %d\n", fileinfo.id); 
             printf("Keyword: %s\n", fileinfo.word); 
             search_keyword(cache, fileinfo.word, fileinfo.index, fd_file_read, msg, &cache_occupation, virtual_time); // this was a experiment to this all in a function......
-            write(fd_to_client, msg, sizeof(msg));
+            // write(fd_to_client, msg, sizeof(msg));
+            write(fd_to_client, msg, strlen(msg));
+
             close(fd_to_client);
         } 
         
