@@ -61,3 +61,7 @@ void search_keyword_with_processes (const char *word, int n);
 
 int search_keyword(Linked* cache[CACHE_LINES], char *word, int index, int fd_file_read, char *msg, int *cache_occupation, int virtual_time);
 int grep_wc(char *word, char *filename, char *msg);
+
+int search_contains_word(char *keyword, int number_of_processes, int number_of_files, int fd_file_read,int deleted, char *msg, int msg_size);
+int file_contains_word(char *filepath, char *keyword); 
+int search_process(char *keyword, int search_amount, int start_point, int pip[2]);

@@ -32,7 +32,7 @@ while IFS=$'\t' read -r filename title year authors; do
     echo "Authors: $authors"
 
     # Call the dclient program with extracted metadata
-    ./dclient -a "$title" "$authors" $year "$filename"
+    ./client -a "$title" "$authors" $year "DatasetTest/Gdataset/Gdataset/$filename"
 
 done < <(tail -n +2 "$INPUT_FILE")
 

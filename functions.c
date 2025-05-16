@@ -298,7 +298,12 @@ int search_keyword(Linked* cache[CACHE_LINES], char *word, int index, int fd_fil
 //     }
 // }
 
-int search_contains_word(char *keyword, int number_of_processes, int number_of_files, int fd_file_read, int fd_file_write, int deleted)   {
+
+
+
+
+
+int search_contains_word(char *keyword, int number_of_processes, int number_of_files, int fd_file_read,int deleted, char *msg, int msg_size) { // this is the function that will be called by the client to search for a word in the storage{
 
     int res;
     indexed_file file_struct;
@@ -306,7 +311,7 @@ int search_contains_word(char *keyword, int number_of_processes, int number_of_f
     //this part here just make sure we have no gaps
     
     lseek(fd_file_read, 0, SEEK_SET);
-    lseek(fd_file_write, 0, SEEK_SET);
+   
 
     if (deleted != 0) {
 
@@ -316,7 +321,7 @@ int search_contains_word(char *keyword, int number_of_processes, int number_of_f
             if (res == -1) {
                 perror("Error reading from storage file");
                 close(fd_file_read);
-                close(fd_file_write); 
+                
                 return 1;
             }
 
@@ -326,7 +331,7 @@ int search_contains_word(char *keyword, int number_of_processes, int number_of_f
                     perror("Error writing to new storage file");
                     close(fd_new);
                     close(fd_file_read);
-                    close(fd_file_write); 
+                    
                     return 1;
                 }
                         
@@ -334,15 +339,142 @@ int search_contains_word(char *keyword, int number_of_processes, int number_of_f
         }
 
         deleted = 0;
+        close(fd_new);
 
     }
 
     lseek(fd_file_read, 0, SEEK_SET);
-    lseek(fd_file_write, 0, SEEK_SET);
+   
+
+    int pip[number_of_processes][2];
+    for (int i = 0; i < number_of_processes; i++) {
+        if (pipe(pip[i]) == -1) {
+            perror("pipe");
+            exit(1);
+        }
+    }
+
+
+   
 
     int search_amount = number_of_files / number_of_processes;
     
+
+    for (int i = 0; i < number_of_processes; i++) {
+        
+        int starting_point = i*search_amount;
+
+        if (i + 1 == number_of_processes) {
+            search_amount = number_of_files; // distribui o resto
+        }
+
+        pid_t pid = fork();
+        if (pid == 0) {
+            search_process(keyword, search_amount, starting_point, pip[i]);
+            exit(0);
+        }
+
+        
+    }
+
+    char buffer[520];
+    
+    strncat(msg,"[", msg_size - strlen(msg) - 1);
+
+
+    for(int i = 0; i < number_of_processes; i++) {
+
+        close(pip[i][1]); // close the write end of the pipe
+        
+
+        ssize_t bytes_read = read(pip[i][0], buffer, sizeof(buffer) - 1);
+        if (bytes_read > 0) {
+            buffer[bytes_read] = '\0'; 
+            strncat(msg, buffer, msg_size - strlen(msg) - 1);
+            
+        }
+        else if (bytes_read == -1) {
+            perror("Error reading from pipe");
+        }
+        else {
+            printf("No data read from pipe\n");
+        }
+
+        close(pip[i][0]); // close the read end of the pipe
+
+        
+        
+    }
+
+    size_t len = strlen(msg);
+    if (len > 0 && msg[len - 1] == ',') {
+        msg[len - 1] = '\0'; 
+    }
+
+    strncat(msg, "]\n", msg_size - strlen(msg) - 1);
+
+    for (int i = 0; i < number_of_processes; i++) {
+        wait(NULL);
+    }
+
     return 0;
+
+}
+
+
+int search_process(char *keyword, int search_amount, int start_point, int pip[2]) { 
+
+   
+
+    int fd = open(storage_path, O_RDONLY);  
+    if (fd == -1) {
+        perror("open");
+        return 1;
+    }
+
+    lseek(fd, start_point*sizeof(indexed_file), SEEK_SET);
+    close(pip[0]); // closing the read end of the pipe
+
+    int res;
+    indexed_file file_struct;
+    char msg[8192] = "";
+    char buffer[64];
+
+    for (int i = 0; i < search_amount; i++) {
+        res = read(fd, &file_struct, sizeof(indexed_file));
+        if (res == 0) {
+            printf("file's over\n");
+            break;
+        }
+
+        if (res == -1) {
+            perror("Error reading from storage file");
+            close(fd);
+            
+            return 1;
+        }
+
+        if (file_struct.active ) { // this should always be active but just to be sure
+            
+            if (file_contains_word(file_struct.path, keyword)) {
+                printf("Found in storage: %s\n", file_struct.path);
+                snprintf(buffer, sizeof(buffer), "%d,", file_struct.id);
+                strncat(msg, buffer, sizeof(msg) - strlen(msg) - 1);
+            } 
+        }
+
+        
+    }
+
+    if (write(pip[1], msg, strlen(msg)) == -1) {
+        perror("Error writing to pipe");
+        close(pip[1]);
+        return 1;
+    }
+    close(fd);
+    close(pip[1]); // closing the write end of the pipe
+    return 0;
+    
 
 }
 
@@ -358,7 +490,7 @@ int file_contains_word(char *filepath, char *keyword) { // 1 or 0
         return 0;
     }
     int status;
-
+ 
     if (pid == 0) { 
         execlp("grep", "grep", "-q", keyword, filepath, NULL);
         perror("execlp");

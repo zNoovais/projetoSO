@@ -283,14 +283,15 @@ int main(int argc, char * argv[]) {
 
         
             printf("Searching for keyword: \"%s\"\n", fileinfo.word);
-            
-            if (fileinfo.processes > 1) {
-                printf("Searching for word [%s] with %d processes...\n", fileinfo.word, fileinfo.processes);
-                search_keyword_with_processes(fileinfo.word, fileinfo.processes);
-            } else {
-                printf("Searching for word [%s] without processes...\n",fileinfo.word);
 
-                search_keyword_without_processes(fileinfo.word);
+            int msg_size = 8192;
+
+            char msg[8192] = "";
+
+            if (fileinfo.processes > 1) {
+                search_contains_word(fileinfo.word, fileinfo.processes, number_of_files, fd_file_read, deleted, msg, msg_size);
+            } else {
+                search_contains_word(fileinfo.word, 1, number_of_files, fd_file_read, deleted, msg, msg_size);
             }
             
             write(fd_to_client, msg, sizeof(msg));
