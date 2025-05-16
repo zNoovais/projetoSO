@@ -10,14 +10,18 @@
 #include <time.h>
 #include <limits.h>
 
-//#define SERVER "fifo_server"
+
 #define PIPE_TO_SERVER "fifo_server" // this is the name of the server fifo just to make it in one place! (like in guide 5 again..)
-// i changed ^^^^^^this fucker to PIPE_TO_SERVER so that we can understand where it going 
+
 #define PIPE_TO_CLIENT "fifo_client" 
 
-#define CACHE_SIZE 100
+#define CACHE_LINES 10
 
 #define storage_path "armazenamento"
+
+#define MAX_CACHE_SIZE 30 // max size of the cache
+
+#define MAX_LINE_SIZE MAX_CACHE_SIZE/CACHE_LINES
 
 //infromation abiout the books and shit
 typedef struct FileInfo { //this should not exceed 512bytes
@@ -47,14 +51,30 @@ typedef struct indexed_file {
 
 typedef struct LinkedList {
     indexed_file file;
+    int last_accessed; 
     struct LinkedList *next;
 } Linked;
 
-int hash(int key);
+typedef struct cacheLines{
+    int occupation;
+    struct LinkedList *list;
 
-void freeL(Linked *link);
-void search_keyword_without_processes(const char *word);
-void search_keyword_with_processes (const char *word, int n);
+} cacheLines; 
 
-int search_keyword(Linked* cache[CACHE_SIZE], char *word, int index, int fd_file_read, char *msg);
+int hash(int key); // hash function key % CACHE_LINES
+
+void freeL(Linked *link); // clean a linked list using free
+
+
+/// -l ///
+int search_keyword(cacheLines cache[CACHE_LINES], char *word, int index, int fd_file_read, char *msg, int *cache_occupation, int virtual_time);
 int grep_wc(char *word, char *filename, char *msg);
+
+/// -s funcs ///
+int search_contains_word(char *keyword, int number_of_processes, int number_of_files, int fd_file_read,int deleted, char *msg, int msg_size);
+int file_contains_word(char *filepath, char *keyword); 
+int search_process(char *keyword, int search_amount, int start_point, int pip[2]);
+
+
+//// cache policie ///
+int remove_least_used(Linked *list, int virtual_time);
