@@ -22,7 +22,7 @@ pipe_to_server:
 	mkfifo pipe_to_server
 
 clean:
-	rm -f *.o server client 
+	rm -f *.o dserver dclient 
 	rm -f pipe_to_server
 	rm -f fifo_client*
 	rm -f fifo_server
