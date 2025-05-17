@@ -58,7 +58,8 @@ int main(int argc, char * argv[]) {
     {
         perror("\nerror creating the pipe: ");
     }
-
+    
+    
     int fd_to_server = open(PIPE_TO_SERVER, O_RDONLY);
     if (fd_to_server == -1) {
         perror("Error opening server FIFO");
@@ -356,14 +357,13 @@ int main(int argc, char * argv[]) {
                 freeL(cache[i].list);
             }
             
-            
-            
+            unlink(PIPE_TO_SERVER);
+            close(fd_to_server); 
             close(fd_file_read);
             close(fd_file_write);
-            unlink(PIPE_TO_SERVER); 
-            close(fd_to_server); 
-            close(fd_file_read); 
-            close(fd_file_write); 
+             
+            
+            
             printf("Server shut down successfully.\n");
             return 0;
 

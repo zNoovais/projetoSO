@@ -6,7 +6,7 @@ make all -f /home/novais/Transferências/Codigo/C/Sistemas Operativos/project/pr
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Fri May 16 15:45:19 2025
+# Make data base, printed on Sat May 17 16:49:27 2025
 
 # Variables
 
@@ -77,7 +77,7 @@ MAKEFILE_LIST := /home/novais/Transferências/Codigo/C/Sistemas Operativos/proje
 # automatic
 @F = $(notdir $@)
 # environment
-VSCODE_PID = 2928
+VSCODE_PID = 3113
 # environment
 XDG_SESSION_TYPE = x11
 # automatic
@@ -200,7 +200,7 @@ GDMSESSION = xmonad
 
 functions.o: functions.c
 #  Implicit rule search has not been done.
-#  Last modified 2025-05-16 15:43:07.766179821
+#  Last modified 2025-05-16 16:41:40.16114941
 #  File has been updated.
 #  Successfully updated.
 #  recipe to execute (from '/home/novais/Transferências/Codigo/C/Sistemas Operativos/project/projetoSO/Makefile', line 19):
@@ -208,7 +208,7 @@ functions.o: functions.c
 
 client: client.o functions.o
 #  Implicit rule search has not been done.
-#  Last modified 2025-05-16 15:43:07.951168574
+#  Last modified 2025-05-16 16:41:40.235145942
 #  File has been updated.
 #  Successfully updated.
 #  recipe to execute (from '/home/novais/Transferências/Codigo/C/Sistemas Operativos/project/projetoSO/Makefile', line 10):
@@ -216,7 +216,7 @@ client: client.o functions.o
 
 client.o: dclient.c functions.o
 #  Implicit rule search has not been done.
-#  Last modified 2025-05-16 15:43:07.880172891
+#  Last modified 2025-05-16 16:41:40.21514688
 #  File has been updated.
 #  Successfully updated.
 #  recipe to execute (from '/home/novais/Transferências/Codigo/C/Sistemas Operativos/project/projetoSO/Makefile', line 16):
@@ -224,7 +224,7 @@ client.o: dclient.c functions.o
 
 server.o: dserver.c
 #  Implicit rule search has not been done.
-#  Last modified 2025-05-16 15:43:07.661186205
+#  Last modified 2025-05-16 16:41:40.119151379
 #  File has been updated.
 #  Successfully updated.
 #  recipe to execute (from '/home/novais/Transferências/Codigo/C/Sistemas Operativos/project/projetoSO/Makefile', line 13):
@@ -250,7 +250,7 @@ clean:
 
 server: server.o functions.o
 #  Implicit rule search has not been done.
-#  Last modified 2025-05-16 15:43:07.823176356
+#  Last modified 2025-05-16 16:41:40.179148567
 #  File has been updated.
 #  Successfully updated.
 #  recipe to execute (from '/home/novais/Transferências/Codigo/C/Sistemas Operativos/project/projetoSO/Makefile', line 7):
@@ -265,7 +265,7 @@ server: server.o functions.o
 # Not a target:
 dserver.c:
 #  Implicit rule search has been done.
-#  Last modified 2025-05-16 15:43:00.937594785
+#  Last modified 2025-05-16 16:17:12.068739115
 #  File has been updated.
 #  Successfully updated.
 
@@ -279,15 +279,15 @@ all: server client
 # Not a target:
 dclient.c:
 #  Implicit rule search has been done.
-#  Last modified 2025-05-16 00:54:33.565571167
- 
+#  Last modified 2025-05-16 16:17:12.068739115
 #  File has been updated.
 #  Successfully updated.
 
 # Not a target:
 functions.c:
 #  Implicit rule search has been done.
-#  Last modified 2025-05-16 15:41:03.310663621
+#  Last modified 2025-05-16 16:17:12.068739115
+ 
 #  File has been updated.
 #  Successfully updated.
 
@@ -312,6 +312,6 @@ pipe_to_server:
 # strcache performance: lookups = 35 / hit rate = 54%
 # hash-table stats:
 # Load=16/8192=0%, Rehash=0, Collisions=0/35=0%
-# Finished Make data base on Fri May 16 15:45:19 2025
+# Finished Make data base on Sat May 17 16:49:27 2025
 
  
