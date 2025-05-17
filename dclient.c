@@ -1,18 +1,11 @@
 #include "H_library.h"
 
-// write(STDOUT_FILENO, " ", strlen(" \n"));
+
 
 int main(int argc, char* argv[]) {
     if (argc < 2)
     {
-        // printf("Usage:\n");
-        // printf("Index request: ./dclient -a [Title] [Author] [Year] [Document name] \n");
-        // printf("Consult document: ./dclient -c [n]\n");
-        // printf("Remove request: ./dclient -d [n]\n");
-        // printf("Search number of lines of keyword: ./dclient -l [n] [keyword]\n");
-        // printf("Search keyword: ./dclient -s [keyword]\n");
-        // printf("Search keyword w/ processes: ./dclient -s [keyword] [number of processes]\n");
-        // printf("Shutdown: ./dclient -f\n");
+        
 
         write(STDOUT_FILENO,"Usage:\n ", strlen("Usage:\n"));
         write(STDOUT_FILENO,"Index request: ./dclient -a [Title] [Author] [Year] [Document name] \n ", strlen("Index request: ./dclient -a [Title] [Author] [Year] [Document name] \n"));
@@ -51,11 +44,11 @@ int main(int argc, char* argv[]) {
     }
 
     //-a cmd
-    // ./dclient -a "Romeo and Juliet" "William Shakespeare" "1997" "1112.txt"
+    
     if (strcmp(argv[1], "-a") == 0) {
         
         if (argc != 6) {
-            // printf("Usage: ./dclient -a [title] [author] [year] [path]\n");
+         
             write(STDOUT_FILENO, "Usage: ./dclient -a [title] [author] [year] [path]\n", strlen("Usage: ./dclient -a [title] [author] [year] [path]\n"));
             close(fd_to_server);
             unlink(client_fifo);
@@ -72,19 +65,11 @@ int main(int argc, char* argv[]) {
     } 
 
     //-c
-    //Submit a request the meta-information of a document
-    /*
-     --input:  $ ./dclient -c 1
-     --out:
-     Title: Romeo and Juliet
-     Authors: William Shakespeare
-     Year: 1997
-     Path: 1112.txt
-    */
+   
     else if (strcmp(argv[1], "-c") == 0) {
         
         if (argc != 3) {
-            // printf("Usage: ./dclient -c [index_of_document]\n");
+           
             write(STDOUT_FILENO, "Usage: ./dclient -c [index_of_document]\n", strlen("Usage: ./dclient -c [index_of_document]\n"));
 
             close(fd_to_server);
@@ -98,12 +83,11 @@ int main(int argc, char* argv[]) {
     } 
 
     //-d
-    //Submit a request to remove an index
-    // $ ./dclient -d 1
+   
     else if (strcmp(argv[1], "-d") == 0) {
         
         if (argc != 3) {
-            // printf("Usage: ./dclient -d [n]\n");
+         
             write(STDOUT_FILENO, "Usage: ./dclient -d [n]\n", strlen("Usage: ./dclient -d [n]\n"));
 
             close(fd_to_server);
@@ -116,16 +100,11 @@ int main(int argc, char* argv[]) {
         
     } 
 
-    //-l
-    //Search number of lines containing a certain keyword
-    /*
-     input: $ ./dclient -l 1 "Romeo"
-     output: 150
-    */
+   
     else if (strcmp(argv[1], "-l") == 0) {
         
         if (argc != 4) {
-            // printf("Usage: ./dclient -l [index_of_document] [keyword]\n");
+           
             write(STDOUT_FILENO, "Usage: ./dclient -l [index_of_document] [keyword]\n", strlen("Usage: ./dclient -l [index_of_document] [keyword]\n"));
 
             close(fd_to_server);
@@ -140,15 +119,7 @@ int main(int argc, char* argv[]) {
     } 
 
     //-s
-    /*
-      Search for a list of document identifiers containing a certain keyword.
-      $ ./dclient -s "praia"
-      [2, 3, 1438]
-      
-      Search for a list of document identifiers containing a certain keyword using multiple processes (e.g., 5).
-      $ ./dclient -s "praia" 5
-      [2, 3, 1438]
-    */
+  
     else if (strcmp(argv[1], "-s") == 0) {
         
         if (argc < 3 || argc > 4) {
@@ -182,7 +153,7 @@ int main(int argc, char* argv[]) {
     else if (strcmp(argv[1], "-f") == 0) {
     
         strcpy(fileinfo.cmd, "-f");
-        // printf("Server is shutting down...\n");
+        
         write(STDOUT_FILENO, "Server is shutting down...\n", strlen("Server is shutting down...\n"));
 
 
@@ -190,7 +161,7 @@ int main(int argc, char* argv[]) {
     
     //if its anything else, which isnt valid
     else {
-        // printf("Invalid command. Please check usage.\n");
+       
         write(STDOUT_FILENO, "Invalid command. Please check usage.\n ", strlen("Invalid command. Please check usage.\n"));
 
         close(fd_to_server);
@@ -211,11 +182,6 @@ int main(int argc, char* argv[]) {
     close(fd_to_server);
 
 
-    //==================================================================================================================================
-    //==================================================================================================================================
-
-
-    // if it's the shutdown command, we're done, the server is dead so leave
     if (strcmp(argv[1], "-f") == 0) {
         unlink(client_fifo);
         return 0;
@@ -240,8 +206,8 @@ int main(int argc, char* argv[]) {
             break; 
         }
     
-        buffer[res] = '\0';  // Ensure null termination
-        // printf("%s", buffer);  // CHANGE THIS TO WRITE INSTEAD OF PRINTF        ================================
+        buffer[res] = '\0';  
+    
         write(STDOUT_FILENO, buffer,res);
     }
     

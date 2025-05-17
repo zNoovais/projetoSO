@@ -68,7 +68,7 @@ int main(int argc, char * argv[]) {
 
     FileInfo fileinfo;
 
-
+    
     open(PIPE_TO_SERVER,O_WRONLY); // this is to keep the pipe open (the server will not be writting in it) (check guide 5)
 
     int res;
@@ -292,7 +292,7 @@ int main(int argc, char * argv[]) {
         
         else if (fileinfo.cmd[1] == 's') {  // this function its tricky because we have to search in the cache and in the storage
 
-        
+            virtual_time++;
             printf("Searching for keyword: \"%s\"\n", fileinfo.word);
 
             int msg_size = 8192;
@@ -345,9 +345,9 @@ int main(int argc, char * argv[]) {
                     }
                 }
 
-                rename("temp", storage_path); //closing everything dear god 
+                rename("temp", storage_path); //closing everything
                 
-                ftruncate(fd_file_write, 0); //
+                ftruncate(fd_file_write, 0);
                 close(fd_new);
             
             }

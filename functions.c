@@ -1,6 +1,6 @@
-#include <stdio.h>   // For printf function
-#include <stdlib.h>  // For system function
-#include <unistd.h>  // For sleep/usleep functions (to replace delay)
+#include <stdio.h>   «
+#include <stdlib.h>  
+#include <unistd.h>  
 #include <string.h>
 #include <fcntl.h>
 #include <sys/types.h>
@@ -27,7 +27,7 @@ int grep_wc(char *word, char *path, char *msg) { // this is basically those exer
     if(fork()==0) {
 
         close(pip1[0]);
-        dup2(pip1[1],1);  // i think thats the order the professor likes it idk at this point
+        dup2(pip1[1],1);  
         close(pip1[1]);
 
         close(pip2[0]);
@@ -158,7 +158,7 @@ int search_keyword(cacheLines cache[CACHE_LINES], char *word, int index, int fd_
     return count;
 }
 
-int search_contains_word(char *keyword, int number_of_processes, int number_of_files, int fd_file_read,int deleted, char *msg, int msg_size) { // this is the function that will be called by the client to search for a word in the storage{
+int search_contains_word(char *keyword, int number_of_processes, int number_of_files, int fd_file_read,int deleted, char *msg, int msg_size) { // this is the function that will be called by the client to search for a word in the storage
 
     int res;
     indexed_file file_struct;
@@ -217,7 +217,7 @@ int search_contains_word(char *keyword, int number_of_processes, int number_of_f
         int starting_point = i*search_amount;
 
         if (i + 1 == number_of_processes) {
-            search_amount = number_of_files; // distribui o resto
+            search_amount = number_of_files; 
         }
 
         pid_t pid = fork();
@@ -419,6 +419,6 @@ void freeL(Linked *link) {
 
 }
 
-int hash(int k) {
+int hash(int k) { // hash function!!! this we can change to whatever we want dont need to be closed adressing 
     return k % CACHE_LINES;
 }
