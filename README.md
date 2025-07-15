@@ -10,7 +10,7 @@ To test it out:
 
 1- $make
 
-2- $./cserver 
+2- $./dserver 
 
 3- in another terminal you can use the command $./dclient
 
